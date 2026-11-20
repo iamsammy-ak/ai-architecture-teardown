@@ -29,7 +29,7 @@ Chosen option 3, **brute-force cosine as one matrix-vector product over a small 
 
 - Good, because memory recall 1.65 ms median vs 23.6 ms to embed the question.
 - Good, because A gateway miss costs 43 ms median, almost all of it the embedding.
-- Good, because hybrid rerank's int8 index cuts memory 4x without an approximate index.
+- Good, because hybrid rerank's exact dense search over 5,183 SciFact abstracts, query embedding included, takes 18.1 ms median (27.9 ms p95); its int8 index is 4x smaller (1.99 MB) at no quality cost (nDCG@10 0.715 vs 0.713).
 - Bad, because revisit past roughly a million vectors per partition, or when partitions are shared across replicas.
 
 ### Confirmation
@@ -57,4 +57,5 @@ Each system's latency benchmark reports search and embedding time separately.
 
 - Memory benchmark: [`benchmark.md`](https://github.com/iamsammy-ak/three-tier-agent-memory/blob/cf1aea0cbaf79a991cd3bd69612a435518dd6441/benchmarks/results/benchmark.md)
 - Gateway overhead: [`overhead.md`](https://github.com/iamsammy-ak/semantic-cache-gateway/blob/b8b77e02b5ed88b329e3af6652060544bd4aeb57/benchmarks/results/overhead.md)
-- Hybrid dense search: [`dense.py`](https://github.com/iamsammy-ak/hybrid-rerank-retrieval/blob/b43a6ecbd07c50621b42f650c3606348cf2c3d93/src/hybrid_retrieval/dense.py)
+- Hybrid dense search: [`dense.py`](https://github.com/iamsammy-ak/hybrid-rerank-retrieval/blob/8c7300d8a31f79088883937bfe4a6352ceeeb9a7/src/hybrid_retrieval/dense.py)
+- SciFact results: [`scifact.md`](https://github.com/iamsammy-ak/hybrid-rerank-retrieval/blob/8c7300d8a31f79088883937bfe4a6352ceeeb9a7/benchmarks/results/scifact.md)

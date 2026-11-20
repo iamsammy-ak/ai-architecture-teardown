@@ -186,7 +186,7 @@ from.
 | Agents → MCP tools | **Not integrated** | The swarm's Executor uses its own sandbox and durable activities call tools directly. Both would become MCP clients; the MCP server already passes the official SDK client's conformance tests. |
 | Proxy → MCP | **Complementary** | The proxy decides *whether* a call may happen (policy, arguments, data classes); the MCP server decides *how* it runs (scopes, jail, sandbox). Both log; the proxy's log is hash-chained. |
 | Agents → trajectory gate | **Adapter needed** | The gate imports OpenAI-style chat logs and JSONL step events. The swarm's routing log and the runtime's journal are both structured enough to export to JSONL steps. |
-| Hybrid rerank benchmark | **Pending re-run** | Hybrid rerank's dense, hybrid and reranked numbers are not measured yet (BM25 is) ([deep-dive](systems/hybrid-rerank-retrieval.md)). |
+| Reranking in the request path | **Design change** | On BEIR SciFact, fusing BM25 and dense lists (RRF) cost 0.9 ms more at p95 than dense alone and lifted nDCG@10 to 0.718, while a MiniLM cross-encoder on the top 10 lowered it to 0.706 and added 1.6 s p95 ([deep-dive](systems/hybrid-rerank-retrieval.md)). The composed design should fuse by default and treat reranking as opt-in, measured per domain. |
 
 ## What it would take to integrate
 

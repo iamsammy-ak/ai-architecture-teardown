@@ -81,7 +81,7 @@ flowchart LR
 | [Inter-agent security proxy](https://iamsammy-ak.github.io/ai-architecture-teardown/systems/inter-agent-security-proxy/) · [repo](https://github.com/iamsammy-ak/inter-agent-security-proxy/tree/d2ad5b5b66bc524c70a2d14d5d7b3097109062fa) | PII tokenisation, injection screening, least-privilege tool policy, hash-chained audit | Injection F1 0.924 on the public deepset test split; PII F1 0.969 at precision 1.000 (synthetic) |
 | [Context assembler engine](https://iamsammy-ak.github.io/ai-architecture-teardown/systems/context-assembler-engine/) · [repo](https://github.com/iamsammy-ak/context-assembler-engine/tree/1f7863ceab66f865fa5e69ff1d0806df8ed260fb) | Allocates a verified token budget across eight prompt slots | 88.6% fact retention and 0 / 320 budget violations vs 66.2% for a fixed split (synthetic) |
 | [Three-tier agent memory](https://iamsammy-ak.github.io/ai-architecture-teardown/systems/three-tier-agent-memory/) · [repo](https://github.com/iamsammy-ak/three-tier-agent-memory/tree/cf1aea0cbaf79a991cd3bd69612a435518dd6441) | Working, episodic and semantic memory with versioned facts | Stale@5 0.224 vs 0.776 for a flat vector store, with 1/8 of the items (synthetic) |
-| [Hybrid rerank retrieval](https://iamsammy-ak.github.io/ai-architecture-teardown/systems/hybrid-rerank-retrieval/) · [repo](https://github.com/iamsammy-ak/hybrid-rerank-retrieval/tree/b43a6ecbd07c50621b42f650c3606348cf2c3d93) | BM25 + dense + fusion + cross-encoder + typed filters | BM25 nDCG@10 0.677 / Recall@100 0.912 on BEIR SciFact (published BM25 0.665), 0.326 / 0.245 on NFCorpus; dense / hybrid / rerank pending a re-run |
+| [Hybrid rerank retrieval](https://iamsammy-ak.github.io/ai-architecture-teardown/systems/hybrid-rerank-retrieval/) · [repo](https://github.com/iamsammy-ak/hybrid-rerank-retrieval/tree/8c7300d8a31f79088883937bfe4a6352ceeeb9a7) | BM25 + dense + fusion + cross-encoder + typed filters | Hybrid RRF nDCG@10 0.718 / Recall@100 0.968 on BEIR SciFact vs 0.677 / 0.912 BM25 and 0.713 / 0.942 dense, for +0.9 ms p95; a cross-encoder rerank lowered nDCG@10 to 0.706 at +1.6 s |
 | [GraphRAG knowledge pipeline](https://iamsammy-ak.github.io/ai-architecture-teardown/systems/graphrag-knowledge-pipeline/) · [repo](https://github.com/iamsammy-ak/graphrag-knowledge-pipeline/tree/21dc6d17dbd5fbc6ef827b8963c6a746f644b96e) | Cited knowledge graph from text; relation-aware multi-hop search | Full support@5 0.75 vs 0.19 for vector search (synthetic, held-out questions) |
 | [Self-correcting agentic RAG](https://iamsammy-ak.github.io/ai-architecture-teardown/systems/self-correcting-agentic-rag/) · [repo](https://github.com/iamsammy-ak/self-correcting-agentic-rag/tree/e84144b098876e7718e2e5e5c1043c02fe045298) | Plan, retrieve, grade, verify every claim, abstain when unsure | Wrong answers 4.3% vs 27.5% for naive RAG (synthetic, no LLM) |
 | [Typed multi-agent swarm](https://iamsammy-ak.github.io/ai-architecture-teardown/systems/typed-multi-agent-swarm/) · [repo](https://github.com/iamsammy-ak/typed-multi-agent-swarm/tree/37b44ec34961f5d3879863a284f203e79d06c1c3) | Supervisor state machine, typed hand-offs, consensus, veto, grounded debate | 97.9% accepted-solution correctness with 3 reviewers @ 0.8 vs 62.0% for a single coder (simulated competence, real execution) |
@@ -259,14 +259,14 @@ and 3.12, and builds the site.
   measured payloads, simulated usage, budgets or assumptions, not provider usage fields.
 - **Synthetic data.** Nine of the eleven benchmarks run on data I wrote; only the proxy's injection test split and
   the BEIR datasets are public.
-- **One benchmark is incomplete.** Hybrid rerank retrieval's dense, hybrid and reranked SciFact numbers are pending a
-  re-run; only its BM25 numbers are measured.
+- **Fusion settings were swept on the test split.** Hybrid rerank's RRF `k` and convex `alpha` sweeps on SciFact show
+  sensitivity, not tuned results; the defaults were fixed before the sweep.
 - **Fast runs are smoke tests.** Only deterministic benchmarks run with full settings are expected to reproduce the
   committed numbers exactly; model- and data-heavy full runs are documented, not run in CI.
 
 ## Roadmap
 
-- [ ] Add hybrid rerank retrieval's dense, hybrid and reranked SciFact numbers once its benchmark is re-run
+- [ ] Choose hybrid rerank's fusion setting and reranker on a held-out split and report the SciFact test score once
 - [ ] Make model endpoints configurable across the repositories and run one request end to end through the gateway, proxy and agentic RAG
 - [ ] Replace assumed token counts with provider usage from live-model runs on the same benchmark splits
 - [ ] Run the full deterministic benchmarks on a schedule and publish the reproduction summary on the site

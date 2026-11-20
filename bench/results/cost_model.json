@@ -222,6 +222,12 @@
             "ms": 23.559
           },
           {
+            "label": "hybrid retrieval, BM25 + dense + RRF (SciFact)",
+            "system": "hybrid-rerank-retrieval",
+            "measurement": "hybrid.rrf_p50_ms",
+            "ms": 18.983
+          },
+          {
             "label": "agentic RAG pipeline, mean (offline writer)",
             "system": "self-correcting-agentic-rag",
             "measurement": "rag.latency_agentic_mean_ms",
@@ -490,6 +496,12 @@
             "system": "three-tier-agent-memory",
             "measurement": "memory.embed_p50_ms",
             "ms": 23.559
+          },
+          {
+            "label": "hybrid retrieval, BM25 + dense + RRF (SciFact)",
+            "system": "hybrid-rerank-retrieval",
+            "measurement": "hybrid.rrf_p50_ms",
+            "ms": 18.983
           },
           {
             "label": "agentic RAG pipeline, mean (offline writer)",
@@ -1666,6 +1678,28 @@
       "repo": "three-tier-agent-memory",
       "path": "benchmarks/results/benchmark.json",
       "pointer": "/meta/question_embedding_ms_p50",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "hybrid.rrf_p50_ms",
+      "value": 18.983,
+      "unit": "ms",
+      "description": "Hybrid retrieval, BM25 + dense + RRF (k=60), median per query including query embedding",
+      "repo": "hybrid-rerank-retrieval",
+      "path": "benchmarks/results/scifact.json",
+      "pointer": "/methods/3/latency_ms/total/p50",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "hybrid.rerank10_p95_ms",
+      "value": 1609.985,
+      "unit": "ms",
+      "description": "Hybrid RRF + MiniLM cross-encoder over the top 10, 95th percentile per query",
+      "repo": "hybrid-rerank-retrieval",
+      "path": "benchmarks/results/scifact.json",
+      "pointer": "/rerank_sweep/0/latency_ms/total/p95",
       "derive": null,
       "tolerance": null
     },

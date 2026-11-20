@@ -41,7 +41,7 @@ def test_pinned_commits_match_the_published_versions(manifest) -> None:
         "self-correcting-agentic-rag": "e84144b", "durable-agent-state-machine": "5facc0f",
         "raw-mcp-tool-server": "1cfc10e", "three-tier-agent-memory": "cf1aea0", "typed-multi-agent-swarm": "37b44ec",
         "trajectory-eval-gate": "3921cce", "inter-agent-security-proxy": "d2ad5b5", "semantic-cache-gateway": "b8b77e0",
-        "hybrid-rerank-retrieval": "b43a6ec",
+        "hybrid-rerank-retrieval": "8c7300d",
     }
     assert {r.name: r.short_commit for r in manifest.repos if r.published} == expected
 

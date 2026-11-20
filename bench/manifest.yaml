@@ -276,7 +276,7 @@ repos:
   - name: hybrid-rerank-retrieval
     title: Hybrid Rerank Retrieval
     summary: From-scratch BM25 and dense retrieval, rank fusion, cross-encoder reranking and typed filters on BEIR.
-    commit: b43a6ecbd07c50621b42f650c3606348cf2c3d93
+    commit: 8c7300d8a31f79088883937bfe4a6352ceeeb9a7
     published: true
     install: ['python -m pip install -e ".[dev]"']
     env: {}
@@ -284,12 +284,20 @@ repos:
     modes:
       full:
         install: ['python -m pip install -e ".[dev,models]"']
-        commands: [python -m hybrid_retrieval download scifact, python -m hybrid_retrieval bench --dataset scifact]
-        runtime_minutes: 60
+        commands:
+          - python -m hybrid_retrieval download scifact
+          - python -m hybrid_retrieval bench --dataset scifact --no-bm25-rerank --threads 4
+        runtime_minutes: 40
         needs_models: true
         needs_data: true
+        matches_committed: true
         results: [benchmarks/results/scifact.json, benchmarks/results/scifact.md]
-        headline: []
+        headline:
+          - {label: "nDCG@10, BM25", file: benchmarks/results/scifact.json, pointer: /methods/0/metrics/ndcg@10}
+          - {label: "nDCG@10, dense (bge-small)", file: benchmarks/results/scifact.json, pointer: /methods/1/metrics/ndcg@10}
+          - {label: "nDCG@10, hybrid RRF (k=60)", file: benchmarks/results/scifact.json, pointer: /methods/3/metrics/ndcg@10}
+          - {label: "nDCG@10, hybrid convex (a=0.5, z-score)", file: benchmarks/results/scifact.json, pointer: /methods/5/metrics/ndcg@10}
+          - {label: "nDCG@10, hybrid RRF + rerank@10", file: benchmarks/results/scifact.json, pointer: /rerank_sweep/0/metrics/ndcg@10}
       fast:
         commands: [python -m hybrid_retrieval download scifact, python -m hybrid_retrieval bench --dataset scifact --sparse-only]
         runtime_minutes: 2

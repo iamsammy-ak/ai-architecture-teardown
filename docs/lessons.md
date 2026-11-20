@@ -27,8 +27,9 @@ compression or eviction. The swarm's cheapest ten points come from running the v
 **3. Every design lost somewhere, and the losses are reported.** The confidence gate in agentic RAG refuses correct
 multi-part answers; GraphRAG's hybrid does not beat graph search alone; the learned router does not beat hand-written
 rules; debate in a five-reviewer panel breaks almost as many decisions as it fixes; circuit breakers cost 0.2 points
-of availability; the proxy's classifier flags 48% of benign agent messages. A benchmark that only shows wins is not
-measuring a trade-off.
+of availability; the proxy's classifier flags 48% of benign agent messages; and on SciFact a cross-encoder reranker
+*lowered* nDCG@10 (0.718 → 0.706) while adding 1.6 s per query, the opposite of the usual advice. A benchmark that
+only shows wins is not measuring a trade-off.
 
 **4. Independence is the hidden assumption of redundancy.** Voting reviewers stop helping as their errors correlate
 (insecure acceptances 0 → 5 at correlation 0.9), and a fallback model in the same tier is no help when the whole tier
@@ -48,7 +49,7 @@ regressions. These only show up when the systems are drawn on one page.
 | Security proxy | deepset/prompt-injections (public) + synthetic agentic suite and PII corpus | deepset; me | bge-small classifier, no LLM | Rules written while reading the train split; agentic suite written with the rules |
 | Context assembler | 40 synthetic conversations | Me | None | Extractive summariser favours identifiers, which the facts carry |
 | Three-tier memory | 50 users × 10 template sessions | Me | bge-small, rule extractor | Extractor written knowing the templates (results split by coverage for that reason) |
-| Hybrid rerank | BEIR SciFact, NFCorpus (public) | Dataset authors | BM25 only so far | Parameter grid on the test split (reported as sensitivity) |
+| Hybrid rerank | BEIR SciFact, NFCorpus (public) | Dataset authors | bge-small + MiniLM cross-encoder | BM25 grid and fusion sweeps (k, alpha) on the test split, reported as sensitivity |
 | GraphRAG | 54 synthetic documents, 42 questions | Me | spaCy rules, bge-small | Dev/test split; held-out extraction set written in a different style |
 | Agentic RAG | 53-page synthetic handbook, 199 questions | Me | bge-small + MiniLM, extractive writer | Train/dev/test split; 69 test questions is small |
 | Typed swarm | 20 tasks, 89 candidate solutions | Me | Simulated competence | Competence is an input; only execution is real |

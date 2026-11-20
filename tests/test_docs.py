@@ -78,12 +78,20 @@ def test_adrs_follow_madr() -> None:
         assert adr.name in index
 
 
-def test_snippets_and_images_exist() -> None:
+RAW_IMAGE = re.compile(r"^https://raw\.githubusercontent\.com/iamsammy-ak/([a-z0-9-]+)/([0-9a-f]{40})/")
+
+
+def test_snippets_and_images_exist(manifest) -> None:
+    commits = manifest.commits()
     for page in DOCS.rglob("*.md"):
         text = page.read_text(encoding="utf-8")
         for snippet in re.findall(r'--8<-- "([^"]+)"', text):
             assert (ROOT / snippet).is_file(), (page.name, snippet)
         for image in re.findall(r"!\[[^\]]*\]\(([^)]+\.png)\)", text):
+            if image.startswith("https://"):  # a chart published in one of the repositories, at its pinned commit
+                match = RAW_IMAGE.match(image)
+                assert match and commits.get(match.group(1)) == match.group(2), (page.name, image)
+                continue
             assert (page.parent / image).resolve().is_file(), (page.name, image)
 
 

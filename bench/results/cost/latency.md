@@ -6,6 +6,7 @@
 | proxy screening (hashing classifier) | inter-agent-security-proxy | 3.7 ms | `proxy.screen_hashing_short_p50_ms` |
 | memory recall (retrieval) | three-tier-agent-memory | 1.6 ms | `memory.recall_p50_ms` |
 | memory query embedding | three-tier-agent-memory | 23.6 ms | `memory.embed_p50_ms` |
+| hybrid retrieval, BM25 + dense + RRF (SciFact) | hybrid-rerank-retrieval | 19.0 ms | `hybrid.rrf_p50_ms` |
 | agentic RAG pipeline, mean (offline writer) | self-correcting-agentic-rag | 1,660.4 ms | `rag.latency_agentic_mean_ms` |
 | context assembly | context-assembler-engine | 37.6 ms | `assembler.latency_p50_ms` |
 

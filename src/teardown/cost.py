@@ -231,6 +231,8 @@ def support_answer(inputs: CostInputs) -> TaskSpec:
                     measurement="memory.recall_p50_ms", ms=v("memory.recall_p50_ms")),
         LatencyItem(label="memory query embedding", system="three-tier-agent-memory",
                     measurement="memory.embed_p50_ms", ms=v("memory.embed_p50_ms")),
+        LatencyItem(label="hybrid retrieval, BM25 + dense + RRF (SciFact)", system="hybrid-rerank-retrieval",
+                    measurement="hybrid.rrf_p50_ms", ms=v("hybrid.rrf_p50_ms")),
         LatencyItem(label="agentic RAG pipeline, mean (offline writer)", system="self-correcting-agentic-rag",
                     measurement="rag.latency_agentic_mean_ms", ms=v("rag.latency_agentic_mean_ms")),
         LatencyItem(label="context assembly", system="context-assembler-engine",
