@@ -1,0 +1,29 @@
+{
+  "command": "PYTHONPATH=src python benchmarks/fuzz_campaign.py --cases 1000 --seed 7",
+  "cases": 1000,
+  "seed": 7,
+  "case_kinds": {
+    "batch": 96,
+    "big": 60,
+    "bytes": 115,
+    "deep": 80,
+    "json": 124,
+    "mutated": 409,
+    "truncated": 116
+  },
+  "reply_codes": {
+    "-32600": 466,
+    "-32601": 9,
+    "-32602": 68,
+    "-32700": 308,
+    "result": 49,
+    "result (isError)": 64
+  },
+  "invalid_stdout_lines": 0,
+  "internal_errors": 0,
+  "internal_error_samples": [],
+  "server_crashes": 0,
+  "clean_exit_code": 0,
+  "seconds": 3.0,
+  "cases_per_second": 338.5
+}

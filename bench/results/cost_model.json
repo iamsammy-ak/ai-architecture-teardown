@@ -1,0 +1,2405 @@
+{
+  "command": "PYTHONPATH=src python -m teardown cost",
+  "price_tables": [
+    {
+      "id": "gateway-illustrative",
+      "label": "Gateway illustrative table",
+      "kind": "repo",
+      "description": "The dated, illustrative three-tier table of semantic-cache-gateway (first model of each tier). Round numbers in the range public price lists use for small, mid-size and frontier models; not a quote from any provider.",
+      "source": {
+        "repo": "semantic-cache-gateway",
+        "path": "src/cache_gateway/data/default_config.yaml",
+        "contains": [
+          "input_per_mtok: 0.10",
+          "output_per_mtok: 0.40",
+          "input_per_mtok: 0.60",
+          "output_per_mtok: 2.40",
+          "input_per_mtok: 3.00",
+          "output_per_mtok: 15.00"
+        ]
+      },
+      "tiers": {
+        "small": {
+          "input": 0.1,
+          "output": 0.4
+        },
+        "medium": {
+          "input": 0.6,
+          "output": 2.4
+        },
+        "large": {
+          "input": 3.0,
+          "output": 15.0
+        }
+      }
+    },
+    {
+      "id": "gateway-narrow",
+      "label": "Gateway narrow table",
+      "kind": "repo",
+      "description": "The gateway benchmark's second table, where the large tier costs only about 4x the small tier on output. It shows how much of any routing saving is the price gap rather than the router.",
+      "source": {
+        "repo": "semantic-cache-gateway",
+        "path": "src/cache_gateway/bench.py",
+        "contains": [
+          "prices = {Tier.SMALL: (1.0, 4.0), Tier.MEDIUM: (1.5, 6.0), Tier.LARGE: (3.0, 15.0)}"
+        ]
+      },
+      "tiers": {
+        "small": {
+          "input": 1.0,
+          "output": 4.0
+        },
+        "medium": {
+          "input": 1.5,
+          "output": 6.0
+        },
+        "large": {
+          "input": 3.0,
+          "output": 15.0
+        }
+      }
+    },
+    {
+      "id": "trajectory-flat",
+      "label": "Trajectory-gate flat table",
+      "kind": "repo",
+      "description": "The single illustrative price of a small hosted model used by trajectory-eval-gate's example agent. Every tier costs the same, so routing has no effect under this table.",
+      "source": {
+        "repo": "trajectory-eval-gate",
+        "path": "src/trajectory_gate/example/agent.py",
+        "contains": [
+          "PRICE_IN_PER_MTOK = 0.50",
+          "PRICE_OUT_PER_MTOK = 1.50"
+        ]
+      },
+      "tiers": {
+        "small": {
+          "input": 0.5,
+          "output": 1.5
+        },
+        "medium": {
+          "input": 0.5,
+          "output": 1.5
+        },
+        "large": {
+          "input": 0.5,
+          "output": 1.5
+        }
+      }
+    },
+    {
+      "id": "scenario-premium-large",
+      "label": "Scenario: premium large tier",
+      "kind": "scenario",
+      "description": "HYPOTHETICAL, defined in this repository only. The gateway's illustrative small and medium prices with a large tier five times more expensive (15/75), standing in for a reasoning-class model. It is a stress test of how much each task depends on its large-tier calls, not a quote.",
+      "source": null,
+      "tiers": {
+        "small": {
+          "input": 0.1,
+          "output": 0.4
+        },
+        "medium": {
+          "input": 0.6,
+          "output": 2.4
+        },
+        "large": {
+          "input": 15.0,
+          "output": 75.0
+        }
+      }
+    }
+  ],
+  "routing_mix": {
+    "all-large": {
+      "small": 0.0,
+      "medium": 0.0,
+      "large": 1.0
+    },
+    "rules": {
+      "small": 0.4186666666666667,
+      "medium": 0.38966666666666666,
+      "large": 0.19166666666666668
+    },
+    "logistic": {
+      "small": 0.5966666666666667,
+      "medium": 0.275,
+      "large": 0.12833333333333333
+    },
+    "all-small": {
+      "small": 1.0,
+      "medium": 0.0,
+      "large": 0.0
+    }
+  },
+  "scenarios": {
+    "support-as-composed": {
+      "label": "Support answer, cache bypassed (as composed)",
+      "cache_hit_rate": 0.0,
+      "router": "logistic",
+      "task": {
+        "id": "support-answer",
+        "title": "Support answer",
+        "summary": "One answer through the gateway, the proxy, memory recall, agentic RAG and the context assembler.",
+        "systems": [
+          "semantic-cache-gateway",
+          "inter-agent-security-proxy",
+          "three-tier-agent-memory",
+          "self-correcting-agentic-rag",
+          "hybrid-rerank-retrieval",
+          "context-assembler-engine"
+        ],
+        "calls": [
+          {
+            "component": "query rewrite",
+            "system": "self-correcting-agentic-rag",
+            "count": 0.42029,
+            "input_tokens": 400.0,
+            "output_tokens": 120.0,
+            "tier": "routed",
+            "cacheable": true,
+            "basis": [
+              "rag.rewrite_rounds_mean",
+              "support.rewrite_input_tokens",
+              "support.rewrite_output_tokens"
+            ]
+          },
+          {
+            "component": "grounded generation",
+            "system": "self-correcting-agentic-rag",
+            "count": 1.0,
+            "input_tokens": 3072.0,
+            "output_tokens": 250.0,
+            "tier": "routed",
+            "cacheable": true,
+            "basis": [
+              "support.prompt_tokens",
+              "assembler.retention_at_3072",
+              "support.answer_tokens"
+            ]
+          },
+          {
+            "component": "memory consolidation (amortised)",
+            "system": "three-tier-agent-memory",
+            "count": 0.2642706131078224,
+            "input_tokens": 513.218,
+            "output_tokens": 150.0,
+            "tier": "small",
+            "cacheable": false,
+            "basis": [
+              "memory.llm_calls_per_session",
+              "memory.turns",
+              "memory.sessions",
+              "memory.consolidation_raw_tokens",
+              "memory.prompt_overhead_tokens",
+              "memory.output_tokens"
+            ]
+          }
+        ],
+        "latency": [
+          {
+            "label": "gateway, cache miss",
+            "system": "semantic-cache-gateway",
+            "measurement": "gateway.overhead.miss_p50_ms",
+            "ms": 42.596
+          },
+          {
+            "label": "proxy screening (hashing classifier)",
+            "system": "inter-agent-security-proxy",
+            "measurement": "proxy.screen_hashing_short_p50_ms",
+            "ms": 3.7
+          },
+          {
+            "label": "memory recall (retrieval)",
+            "system": "three-tier-agent-memory",
+            "measurement": "memory.recall_p50_ms",
+            "ms": 1.65
+          },
+          {
+            "label": "memory query embedding",
+            "system": "three-tier-agent-memory",
+            "measurement": "memory.embed_p50_ms",
+            "ms": 23.559
+          },
+          {
+            "label": "agentic RAG pipeline, mean (offline writer)",
+            "system": "self-correcting-agentic-rag",
+            "measurement": "rag.latency_agentic_mean_ms",
+            "ms": 1660.368
+          },
+          {
+            "label": "context assembly",
+            "system": "context-assembler-engine",
+            "measurement": "assembler.latency_p50_ms",
+            "ms": 37.6
+          }
+        ],
+        "success_rate": null,
+        "notes": [
+          "The agentic RAG generator calls the model at temperature 0.1 and the gateway caches only requests at or below cache.max_temperature (0.0 by default), so as composed today the cache never serves this task. The 'cache aligned' scenario assumes the generator is moved to temperature 0.",
+          "Routing shares are the gateway's measured routing of its synthetic support workload, applied to these prompts by assumption."
+        ]
+      },
+      "by_price_table": {
+        "gateway-illustrative": {
+          "usd": 0.0028531375319382664,
+          "usd_per_1000": 2.8531375319382666,
+          "usd_per_success": null,
+          "billed_calls": 1.6845606131078223,
+          "input_tokens": 3375.7444355179705,
+          "output_tokens": 340.07539196617336,
+          "lines": [
+            {
+              "component": "query rewrite",
+              "system": "self-correcting-agentic-rag",
+              "tier": "routed",
+              "calls": 0.42029,
+              "billed_calls": 0.42029,
+              "input_tokens": 168.11599999999999,
+              "output_tokens": 50.4348,
+              "usd": 0.0002449057849333333
+            },
+            {
+              "component": "grounded generation",
+              "system": "self-correcting-agentic-rag",
+              "tier": "routed",
+              "calls": 1.0,
+              "billed_calls": 1.0,
+              "input_tokens": 3072.0,
+              "output_tokens": 250.0,
+              "usd": 0.0025788126666666665
+            },
+            {
+              "component": "memory consolidation (amortised)",
+              "system": "three-tier-agent-memory",
+              "tier": "small",
+              "calls": 0.2642706131078224,
+              "billed_calls": 0.2642706131078224,
+              "input_tokens": 135.6284355179704,
+              "output_tokens": 39.64059196617336,
+              "usd": 2.9419080338266385e-05
+            }
+          ]
+        },
+        "gateway-narrow": {
+          "usd": 0.006602544659382664,
+          "usd_per_1000": 6.602544659382664,
+          "usd_per_success": null,
+          "billed_calls": 1.6845606131078223,
+          "input_tokens": 3375.7444355179705,
+          "output_tokens": 340.07539196617336,
+          "lines": [
+            {
+              "component": "query rewrite",
+              "system": "self-correcting-agentic-rag",
+              "tier": "routed",
+              "calls": 0.42029,
+              "billed_calls": 0.42029,
+              "input_tokens": 168.11599999999999,
+              "output_tokens": 50.4348,
+              "usd": 0.0005350571893333333
+            },
+            {
+              "component": "grounded generation",
+              "system": "self-correcting-agentic-rag",
+              "tier": "routed",
+              "calls": 1.0,
+              "billed_calls": 1.0,
+              "input_tokens": 3072.0,
+              "output_tokens": 250.0,
+              "usd": 0.005773296666666667
+            },
+            {
+              "component": "memory consolidation (amortised)",
+              "system": "three-tier-agent-memory",
+              "tier": "small",
+              "calls": 0.2642706131078224,
+              "billed_calls": 0.2642706131078224,
+              "input_tokens": 135.6284355179704,
+              "output_tokens": 39.64059196617336,
+              "usd": 0.0002941908033826638
+            }
+          ]
+        },
+        "trajectory-flat": {
+          "usd": 0.002197985305708245,
+          "usd_per_1000": 2.197985305708245,
+          "usd_per_success": null,
+          "billed_calls": 1.6845606131078223,
+          "input_tokens": 3375.7444355179705,
+          "output_tokens": 340.07539196617336,
+          "lines": [
+            {
+              "component": "query rewrite",
+              "system": "self-correcting-agentic-rag",
+              "tier": "routed",
+              "calls": 0.42029,
+              "billed_calls": 0.42029,
+              "input_tokens": 168.11599999999999,
+              "output_tokens": 50.4348,
+              "usd": 0.00015971020000000001
+            },
+            {
+              "component": "grounded generation",
+              "system": "self-correcting-agentic-rag",
+              "tier": "routed",
+              "calls": 1.0,
+              "billed_calls": 1.0,
+              "input_tokens": 3072.0,
+              "output_tokens": 250.0,
+              "usd": 0.001911
+            },
+            {
+              "component": "memory consolidation (amortised)",
+              "system": "three-tier-agent-memory",
+              "tier": "small",
+              "calls": 0.2642706131078224,
+              "billed_calls": 0.2642706131078224,
+              "input_tokens": 135.6284355179704,
+              "output_tokens": 39.64059196617336,
+              "usd": 0.00012727510570824523
+            }
+          ]
+        },
+        "scenario-premium-large": {
+          "usd": 0.010156264131938268,
+          "usd_per_1000": 10.156264131938267,
+          "usd_per_success": null,
+          "billed_calls": 1.6845606131078223,
+          "input_tokens": 3375.7444355179705,
+          "output_tokens": 340.07539196617336,
+          "lines": [
+            {
+              "component": "query rewrite",
+              "system": "self-correcting-agentic-rag",
+              "tier": "routed",
+              "calls": 0.42029,
+              "billed_calls": 0.42029,
+              "input_tokens": 168.11599999999999,
+              "output_tokens": 50.4348,
+              "usd": 0.0008921523849333333
+            },
+            {
+              "component": "grounded generation",
+              "system": "self-correcting-agentic-rag",
+              "tier": "routed",
+              "calls": 1.0,
+              "billed_calls": 1.0,
+              "input_tokens": 3072.0,
+              "output_tokens": 250.0,
+              "usd": 0.009234692666666667
+            },
+            {
+              "component": "memory consolidation (amortised)",
+              "system": "three-tier-agent-memory",
+              "tier": "small",
+              "calls": 0.2642706131078224,
+              "billed_calls": 0.2642706131078224,
+              "input_tokens": 135.6284355179704,
+              "output_tokens": 39.64059196617336,
+              "usd": 2.9419080338266385e-05
+            }
+          ]
+        }
+      }
+    },
+    "support-cache-aligned": {
+      "label": "Support answer, cache aligned",
+      "cache_hit_rate": 0.47167,
+      "router": "logistic",
+      "task": {
+        "id": "support-answer",
+        "title": "Support answer",
+        "summary": "One answer through the gateway, the proxy, memory recall, agentic RAG and the context assembler.",
+        "systems": [
+          "semantic-cache-gateway",
+          "inter-agent-security-proxy",
+          "three-tier-agent-memory",
+          "self-correcting-agentic-rag",
+          "hybrid-rerank-retrieval",
+          "context-assembler-engine"
+        ],
+        "calls": [
+          {
+            "component": "query rewrite",
+            "system": "self-correcting-agentic-rag",
+            "count": 0.42029,
+            "input_tokens": 400.0,
+            "output_tokens": 120.0,
+            "tier": "routed",
+            "cacheable": true,
+            "basis": [
+              "rag.rewrite_rounds_mean",
+              "support.rewrite_input_tokens",
+              "support.rewrite_output_tokens"
+            ]
+          },
+          {
+            "component": "grounded generation",
+            "system": "self-correcting-agentic-rag",
+            "count": 1.0,
+            "input_tokens": 3072.0,
+            "output_tokens": 250.0,
+            "tier": "routed",
+            "cacheable": true,
+            "basis": [
+              "support.prompt_tokens",
+              "assembler.retention_at_3072",
+              "support.answer_tokens"
+            ]
+          },
+          {
+            "component": "memory consolidation (amortised)",
+            "system": "three-tier-agent-memory",
+            "count": 0.2642706131078224,
+            "input_tokens": 513.218,
+            "output_tokens": 150.0,
+            "tier": "small",
+            "cacheable": false,
+            "basis": [
+              "memory.llm_calls_per_session",
+              "memory.turns",
+              "memory.sessions",
+              "memory.consolidation_raw_tokens",
+              "memory.prompt_overhead_tokens",
+              "memory.output_tokens"
+            ]
+          }
+        ],
+        "latency": [
+          {
+            "label": "gateway, cache miss",
+            "system": "semantic-cache-gateway",
+            "measurement": "gateway.overhead.miss_p50_ms",
+            "ms": 42.596
+          },
+          {
+            "label": "proxy screening (hashing classifier)",
+            "system": "inter-agent-security-proxy",
+            "measurement": "proxy.screen_hashing_short_p50_ms",
+            "ms": 3.7
+          },
+          {
+            "label": "memory recall (retrieval)",
+            "system": "three-tier-agent-memory",
+            "measurement": "memory.recall_p50_ms",
+            "ms": 1.65
+          },
+          {
+            "label": "memory query embedding",
+            "system": "three-tier-agent-memory",
+            "measurement": "memory.embed_p50_ms",
+            "ms": 23.559
+          },
+          {
+            "label": "agentic RAG pipeline, mean (offline writer)",
+            "system": "self-correcting-agentic-rag",
+            "measurement": "rag.latency_agentic_mean_ms",
+            "ms": 1660.368
+          },
+          {
+            "label": "context assembly",
+            "system": "context-assembler-engine",
+            "measurement": "assembler.latency_p50_ms",
+            "ms": 37.6
+          }
+        ],
+        "success_rate": null,
+        "notes": [
+          "The agentic RAG generator calls the model at temperature 0.1 and the gateway caches only requests at or below cache.max_temperature (0.0 by default), so as composed today the cache never serves this task. The 'cache aligned' scenario assumes the generator is moved to temperature 0.",
+          "Routing shares are the gateway's measured routing of its synthetic support workload, applied to these prompts by assumption."
+        ]
+      },
+      "by_price_table": {
+        "gateway-illustrative": {
+          "usd": 0.0015212742498720941,
+          "usd_per_1000": 1.5212742498720941,
+          "usd_per_success": null,
+          "billed_calls": 1.0146524288078225,
+          "input_tokens": 1847.4789217979703,
+          "output_tokens": 198.36930985017335,
+          "lines": [
+            {
+              "component": "query rewrite",
+              "system": "self-correcting-agentic-rag",
+              "tier": "routed",
+              "calls": 0.42029,
+              "billed_calls": 0.2220518157,
+              "input_tokens": 88.82072628,
+              "output_tokens": 26.646217884,
+              "usd": 0.000129391073353828
+            },
+            {
+              "component": "grounded generation",
+              "system": "self-correcting-agentic-rag",
+              "tier": "routed",
+              "calls": 1.0,
+              "billed_calls": 0.52833,
+              "input_tokens": 1623.02976,
+              "output_tokens": 132.08249999999998,
+              "usd": 0.0013624640961799998
+            },
+            {
+              "component": "memory consolidation (amortised)",
+              "system": "three-tier-agent-memory",
+              "tier": "small",
+              "calls": 0.2642706131078224,
+              "billed_calls": 0.2642706131078224,
+              "input_tokens": 135.6284355179704,
+              "output_tokens": 39.64059196617336,
+              "usd": 2.9419080338266385e-05
+            }
+          ]
+        },
+        "gateway-narrow": {
+          "usd": 0.003627083396123144,
+          "usd_per_1000": 3.627083396123144,
+          "usd_per_success": null,
+          "billed_calls": 1.0146524288078225,
+          "input_tokens": 1847.4789217979703,
+          "output_tokens": 198.36930985017335,
+          "lines": [
+            {
+              "component": "query rewrite",
+              "system": "self-correcting-agentic-rag",
+              "tier": "routed",
+              "calls": 0.42029,
+              "billed_calls": 0.2220518157,
+              "input_tokens": 88.82072628,
+              "output_tokens": 26.646217884,
+              "usd": 0.00028268676484048
+            },
+            {
+              "component": "grounded generation",
+              "system": "self-correcting-agentic-rag",
+              "tier": "routed",
+              "calls": 1.0,
+              "billed_calls": 0.52833,
+              "input_tokens": 1623.02976,
+              "output_tokens": 132.08249999999998,
+              "usd": 0.0030502058279
+            },
+            {
+              "component": "memory consolidation (amortised)",
+              "system": "three-tier-agent-memory",
+              "tier": "small",
+              "calls": 0.2642706131078224,
+              "billed_calls": 0.2642706131078224,
+              "input_tokens": 135.6284355179704,
+              "output_tokens": 39.64059196617336,
+              "usd": 0.0002941908033826638
+            }
+          ]
+        },
+        "trajectory-flat": {
+          "usd": 0.001221293425674245,
+          "usd_per_1000": 1.221293425674245,
+          "usd_per_success": null,
+          "billed_calls": 1.0146524288078225,
+          "input_tokens": 1847.4789217979703,
+          "output_tokens": 198.36930985017335,
+          "lines": [
+            {
+              "component": "query rewrite",
+              "system": "self-correcting-agentic-rag",
+              "tier": "routed",
+              "calls": 0.42029,
+              "billed_calls": 0.2220518157,
+              "input_tokens": 88.82072628,
+              "output_tokens": 26.646217884,
+              "usd": 8.4379689966e-05
+            },
+            {
+              "component": "grounded generation",
+              "system": "self-correcting-agentic-rag",
+              "tier": "routed",
+              "calls": 1.0,
+              "billed_calls": 0.52833,
+              "input_tokens": 1623.02976,
+              "output_tokens": 132.08249999999998,
+              "usd": 0.0010096386299999999
+            },
+            {
+              "component": "memory consolidation (amortised)",
+              "system": "three-tier-agent-memory",
+              "tier": "small",
+              "calls": 0.2642706131078224,
+              "billed_calls": 0.2642706131078224,
+              "input_tokens": 135.6284355179704,
+              "output_tokens": 39.64059196617336,
+              "usd": 0.00012727510570824523
+            }
+          ]
+        },
+        "scenario-premium-large": {
+          "usd": 0.0053797351264500935,
+          "usd_per_1000": 5.379735126450093,
+          "usd_per_success": null,
+          "billed_calls": 1.0146524288078225,
+          "input_tokens": 1847.4789217979703,
+          "output_tokens": 198.36930985017335,
+          "lines": [
+            {
+              "component": "query rewrite",
+              "system": "self-correcting-agentic-rag",
+              "tier": "routed",
+              "calls": 0.42029,
+              "billed_calls": 0.2220518157,
+              "input_tokens": 88.82072628,
+              "output_tokens": 26.646217884,
+              "usd": 0.00047135086953182793
+            },
+            {
+              "component": "grounded generation",
+              "system": "self-correcting-agentic-rag",
+              "tier": "routed",
+              "calls": 1.0,
+              "billed_calls": 0.52833,
+              "input_tokens": 1623.02976,
+              "output_tokens": 132.08249999999998,
+              "usd": 0.00487896517658
+            },
+            {
+              "component": "memory consolidation (amortised)",
+              "system": "three-tier-agent-memory",
+              "tier": "small",
+              "calls": 0.2642706131078224,
+              "billed_calls": 0.2642706131078224,
+              "input_tokens": 135.6284355179704,
+              "output_tokens": 39.64059196617336,
+              "usd": 2.9419080338266385e-05
+            }
+          ]
+        }
+      }
+    },
+    "coding-swarm": {
+      "label": "Coding task, 3 reviewers @ 0.8",
+      "cache_hit_rate": 0.0,
+      "router": "logistic",
+      "task": {
+        "id": "coding-task",
+        "title": "Coding task (3 reviewers @ 0.8)",
+        "summary": "A programming task through the supervisor, researcher, coder, sandboxed executor and reviewers.",
+        "systems": [
+          "typed-multi-agent-swarm",
+          "inter-agent-security-proxy",
+          "raw-mcp-tool-server"
+        ],
+        "calls": [
+          {
+            "component": "agent calls (3 reviewers @ 0.8)",
+            "system": "typed-multi-agent-swarm",
+            "count": 9.0967,
+            "input_tokens": 1177.7798542328537,
+            "output_tokens": 203.41992150999812,
+            "tier": "large",
+            "cacheable": false,
+            "basis": [
+              "swarm.r3.a0.8.calls",
+              "swarm.r3.a0.8.tokens",
+              "swarm.output_share",
+              "swarm.system_prompt_tokens"
+            ]
+          }
+        ],
+        "latency": [
+          {
+            "label": "proxy screening per hand-off (hashing)",
+            "system": "inter-agent-security-proxy",
+            "measurement": "proxy.screen_hashing_short_p50_ms",
+            "ms": 3.7
+          },
+          {
+            "label": "MCP tools/call round trip",
+            "system": "raw-mcp-tool-server",
+            "measurement": "mcp.calculate_p50_ms",
+            "ms": 1.077
+          },
+          {
+            "label": "MCP run_python sandbox",
+            "system": "raw-mcp-tool-server",
+            "measurement": "mcp.run_python_p50_ms",
+            "ms": 305.154
+          }
+        ],
+        "success_rate": 0.9433,
+        "notes": [
+          "Calls and payload tokens are the swarm's offline measurements with simulated agent competence; the success rate is measured by running the accepted code against hidden tests.",
+          "Swarm agents call models at temperature 0.2 and every task is different, so no cache hit is assumed."
+        ]
+      },
+      "by_price_table": {
+        "gateway-illustrative": {
+          "usd": 0.059898480000000004,
+          "usd_per_1000": 59.898480000000006,
+          "usd_per_success": 0.0634988656842998,
+          "billed_calls": 9.0967,
+          "input_tokens": 10713.91,
+          "output_tokens": 1850.45,
+          "lines": [
+            {
+              "component": "agent calls (3 reviewers @ 0.8)",
+              "system": "typed-multi-agent-swarm",
+              "tier": "large",
+              "calls": 9.0967,
+              "billed_calls": 9.0967,
+              "input_tokens": 10713.91,
+              "output_tokens": 1850.45,
+              "usd": 0.059898480000000004
+            }
+          ]
+        },
+        "gateway-narrow": {
+          "usd": 0.059898480000000004,
+          "usd_per_1000": 59.898480000000006,
+          "usd_per_success": 0.0634988656842998,
+          "billed_calls": 9.0967,
+          "input_tokens": 10713.91,
+          "output_tokens": 1850.45,
+          "lines": [
+            {
+              "component": "agent calls (3 reviewers @ 0.8)",
+              "system": "typed-multi-agent-swarm",
+              "tier": "large",
+              "calls": 9.0967,
+              "billed_calls": 9.0967,
+              "input_tokens": 10713.91,
+              "output_tokens": 1850.45,
+              "usd": 0.059898480000000004
+            }
+          ]
+        },
+        "trajectory-flat": {
+          "usd": 0.00813263,
+          "usd_per_1000": 8.13263,
+          "usd_per_success": 0.008621467189653344,
+          "billed_calls": 9.0967,
+          "input_tokens": 10713.91,
+          "output_tokens": 1850.45,
+          "lines": [
+            {
+              "component": "agent calls (3 reviewers @ 0.8)",
+              "system": "typed-multi-agent-swarm",
+              "tier": "large",
+              "calls": 9.0967,
+              "billed_calls": 9.0967,
+              "input_tokens": 10713.91,
+              "output_tokens": 1850.45,
+              "usd": 0.00813263
+            }
+          ]
+        },
+        "scenario-premium-large": {
+          "usd": 0.2994924,
+          "usd_per_1000": 299.4924,
+          "usd_per_success": 0.317494328421499,
+          "billed_calls": 9.0967,
+          "input_tokens": 10713.91,
+          "output_tokens": 1850.45,
+          "lines": [
+            {
+              "component": "agent calls (3 reviewers @ 0.8)",
+              "system": "typed-multi-agent-swarm",
+              "tier": "large",
+              "calls": 9.0967,
+              "billed_calls": 9.0967,
+              "input_tokens": 10713.91,
+              "output_tokens": 1850.45,
+              "usd": 0.2994924
+            }
+          ]
+        }
+      }
+    },
+    "research-durable": {
+      "label": "Research workflow, durable",
+      "cache_hit_rate": 0.0,
+      "router": "logistic",
+      "task": {
+        "id": "research-workflow",
+        "title": "Research workflow (durable, crash p=0)",
+        "summary": "Plan, gather sources (GraphRAG local search, no LLM offline), draft, wait for approval, publish once.",
+        "systems": [
+          "durable-agent-state-machine",
+          "graphrag-knowledge-pipeline",
+          "context-assembler-engine",
+          "inter-agent-security-proxy"
+        ],
+        "calls": [
+          {
+            "component": "plan",
+            "system": "durable-agent-state-machine",
+            "count": 1.0,
+            "input_tokens": 1200.0,
+            "output_tokens": 300.0,
+            "tier": "medium",
+            "cacheable": false,
+            "basis": [
+              "research.plan_input_tokens",
+              "research.plan_output_tokens"
+            ]
+          },
+          {
+            "component": "draft",
+            "system": "durable-agent-state-machine",
+            "count": 1.0,
+            "input_tokens": 8192.0,
+            "output_tokens": 1200.0,
+            "tier": "large",
+            "cacheable": false,
+            "basis": [
+              "research.draft_input_tokens",
+              "research.draft_output_tokens"
+            ]
+          }
+        ],
+        "latency": [
+          {
+            "label": "one durable step (SQLite WAL, checkpoint every transition)",
+            "system": "durable-agent-state-machine",
+            "measurement": "durable.step_overhead_ms",
+            "ms": 1.971
+          }
+        ],
+        "success_rate": null,
+        "notes": [
+          "The crash model assumes every step attempt crashes independently with the same probability and that a crash wastes the tokens of the interrupted attempt.",
+          "In the chaos benchmark, 200 kills over 756 runs caused 89 re-run attempts and no completed step ran twice."
+        ]
+      },
+      "by_price_table": {
+        "gateway-illustrative": {
+          "usd": 0.044016,
+          "usd_per_1000": 44.016,
+          "usd_per_success": null,
+          "billed_calls": 2.0,
+          "input_tokens": 9392.0,
+          "output_tokens": 1500.0,
+          "lines": [
+            {
+              "component": "plan",
+              "system": "durable-agent-state-machine",
+              "tier": "medium",
+              "calls": 1.0,
+              "billed_calls": 1.0,
+              "input_tokens": 1200.0,
+              "output_tokens": 300.0,
+              "usd": 0.00144
+            },
+            {
+              "component": "draft",
+              "system": "durable-agent-state-machine",
+              "tier": "large",
+              "calls": 1.0,
+              "billed_calls": 1.0,
+              "input_tokens": 8192.0,
+              "output_tokens": 1200.0,
+              "usd": 0.042576
+            }
+          ]
+        },
+        "gateway-narrow": {
+          "usd": 0.046176,
+          "usd_per_1000": 46.176,
+          "usd_per_success": null,
+          "billed_calls": 2.0,
+          "input_tokens": 9392.0,
+          "output_tokens": 1500.0,
+          "lines": [
+            {
+              "component": "plan",
+              "system": "durable-agent-state-machine",
+              "tier": "medium",
+              "calls": 1.0,
+              "billed_calls": 1.0,
+              "input_tokens": 1200.0,
+              "output_tokens": 300.0,
+              "usd": 0.0036
+            },
+            {
+              "component": "draft",
+              "system": "durable-agent-state-machine",
+              "tier": "large",
+              "calls": 1.0,
+              "billed_calls": 1.0,
+              "input_tokens": 8192.0,
+              "output_tokens": 1200.0,
+              "usd": 0.042576
+            }
+          ]
+        },
+        "trajectory-flat": {
+          "usd": 0.006946,
+          "usd_per_1000": 6.946,
+          "usd_per_success": null,
+          "billed_calls": 2.0,
+          "input_tokens": 9392.0,
+          "output_tokens": 1500.0,
+          "lines": [
+            {
+              "component": "plan",
+              "system": "durable-agent-state-machine",
+              "tier": "medium",
+              "calls": 1.0,
+              "billed_calls": 1.0,
+              "input_tokens": 1200.0,
+              "output_tokens": 300.0,
+              "usd": 0.00105
+            },
+            {
+              "component": "draft",
+              "system": "durable-agent-state-machine",
+              "tier": "large",
+              "calls": 1.0,
+              "billed_calls": 1.0,
+              "input_tokens": 8192.0,
+              "output_tokens": 1200.0,
+              "usd": 0.005896
+            }
+          ]
+        },
+        "scenario-premium-large": {
+          "usd": 0.21432,
+          "usd_per_1000": 214.32000000000002,
+          "usd_per_success": null,
+          "billed_calls": 2.0,
+          "input_tokens": 9392.0,
+          "output_tokens": 1500.0,
+          "lines": [
+            {
+              "component": "plan",
+              "system": "durable-agent-state-machine",
+              "tier": "medium",
+              "calls": 1.0,
+              "billed_calls": 1.0,
+              "input_tokens": 1200.0,
+              "output_tokens": 300.0,
+              "usd": 0.00144
+            },
+            {
+              "component": "draft",
+              "system": "durable-agent-state-machine",
+              "tier": "large",
+              "calls": 1.0,
+              "billed_calls": 1.0,
+              "input_tokens": 8192.0,
+              "output_tokens": 1200.0,
+              "usd": 0.21288
+            }
+          ]
+        }
+      }
+    },
+    "pr-gate": {
+      "label": "Pull-request gate, offline judge",
+      "cache_hit_rate": 0.0,
+      "router": "logistic",
+      "task": {
+        "id": "pr-gate",
+        "title": "Pull-request gate (offline judge)",
+        "summary": "Re-run the agent on every eval case, grade each run against its golden DAG, compare with the baseline.",
+        "systems": [
+          "trajectory-eval-gate"
+        ],
+        "calls": [
+          {
+            "component": "agent runs, candidate",
+            "system": "trajectory-eval-gate",
+            "count": 88.5,
+            "input_tokens": 759.5915254237287,
+            "output_tokens": 42.72881355932203,
+            "tier": "routed",
+            "cacheable": false,
+            "basis": [
+              "trajectory.run.llm_calls",
+              "trajectory.run.tokens_in",
+              "trajectory.run.tokens_out",
+              "gate.cases",
+              "gate.candidate_runs_per_case"
+            ]
+          },
+          {
+            "component": "agent runs, baseline (amortised)",
+            "system": "trajectory-eval-gate",
+            "count": 29.5,
+            "input_tokens": 759.5915254237287,
+            "output_tokens": 42.72881355932203,
+            "tier": "routed",
+            "cacheable": false,
+            "basis": [
+              "trajectory.run.llm_calls",
+              "trajectory.run.tokens_in",
+              "trajectory.run.tokens_out",
+              "gate.cases",
+              "gate.baseline_runs_per_case",
+              "gate.prs_per_baseline"
+            ]
+          }
+        ],
+        "latency": [
+          {
+            "label": "grade one trajectory",
+            "system": "trajectory-eval-gate",
+            "measurement": "trajectory.grade_ms_mean",
+            "ms": 6.89
+          }
+        ],
+        "success_rate": null,
+        "notes": [
+          "Eval runs must bypass the response cache: a temperature-0 cache would replay the baseline and hide both regressions and flakiness.",
+          "Token counts are the scripted travel-desk agent's simulated usage, not a live model's."
+        ]
+      },
+      "by_price_table": {
+        "gateway-illustrative": {
+          "usd": 0.06888244806666666,
+          "usd_per_1000": 68.88244806666665,
+          "usd_per_success": null,
+          "billed_calls": 118.0,
+          "input_tokens": 89631.79999999999,
+          "output_tokens": 5041.999999999999,
+          "lines": [
+            {
+              "component": "agent runs, candidate",
+              "system": "trajectory-eval-gate",
+              "tier": "routed",
+              "calls": 88.5,
+              "billed_calls": 88.5,
+              "input_tokens": 67223.84999999999,
+              "output_tokens": 3781.4999999999995,
+              "usd": 0.05166183605
+            },
+            {
+              "component": "agent runs, baseline (amortised)",
+              "system": "trajectory-eval-gate",
+              "tier": "routed",
+              "calls": 29.5,
+              "billed_calls": 29.5,
+              "input_tokens": 22407.949999999997,
+              "output_tokens": 1260.4999999999998,
+              "usd": 0.017220612016666664
+            }
+          ]
+        },
+        "gateway-narrow": {
+          "usd": 0.15502039116666666,
+          "usd_per_1000": 155.02039116666666,
+          "usd_per_success": null,
+          "billed_calls": 118.0,
+          "input_tokens": 89631.79999999999,
+          "output_tokens": 5041.999999999999,
+          "lines": [
+            {
+              "component": "agent runs, candidate",
+              "system": "trajectory-eval-gate",
+              "tier": "routed",
+              "calls": 88.5,
+              "billed_calls": 88.5,
+              "input_tokens": 67223.84999999999,
+              "output_tokens": 3781.4999999999995,
+              "usd": 0.116265293375
+            },
+            {
+              "component": "agent runs, baseline (amortised)",
+              "system": "trajectory-eval-gate",
+              "tier": "routed",
+              "calls": 29.5,
+              "billed_calls": 29.5,
+              "input_tokens": 22407.949999999997,
+              "output_tokens": 1260.4999999999998,
+              "usd": 0.038755097791666665
+            }
+          ]
+        },
+        "trajectory-flat": {
+          "usd": 0.0523789,
+          "usd_per_1000": 52.3789,
+          "usd_per_success": null,
+          "billed_calls": 118.0,
+          "input_tokens": 89631.79999999999,
+          "output_tokens": 5041.999999999999,
+          "lines": [
+            {
+              "component": "agent runs, candidate",
+              "system": "trajectory-eval-gate",
+              "tier": "routed",
+              "calls": 88.5,
+              "billed_calls": 88.5,
+              "input_tokens": 67223.84999999999,
+              "output_tokens": 3781.4999999999995,
+              "usd": 0.039284175
+            },
+            {
+              "component": "agent runs, baseline (amortised)",
+              "system": "trajectory-eval-gate",
+              "tier": "routed",
+              "calls": 29.5,
+              "billed_calls": 29.5,
+              "input_tokens": 22407.949999999997,
+              "output_tokens": 1260.4999999999998,
+              "usd": 0.013094725
+            }
+          ]
+        },
+        "scenario-premium-large": {
+          "usd": 0.24573882006666664,
+          "usd_per_1000": 245.73882006666665,
+          "usd_per_success": null,
+          "billed_calls": 118.0,
+          "input_tokens": 89631.79999999999,
+          "output_tokens": 5041.999999999999,
+          "lines": [
+            {
+              "component": "agent runs, candidate",
+              "system": "trajectory-eval-gate",
+              "tier": "routed",
+              "calls": 88.5,
+              "billed_calls": 88.5,
+              "input_tokens": 67223.84999999999,
+              "output_tokens": 3781.4999999999995,
+              "usd": 0.18430411505
+            },
+            {
+              "component": "agent runs, baseline (amortised)",
+              "system": "trajectory-eval-gate",
+              "tier": "routed",
+              "calls": 29.5,
+              "billed_calls": 29.5,
+              "input_tokens": 22407.949999999997,
+              "output_tokens": 1260.4999999999998,
+              "usd": 0.06143470501666666
+            }
+          ]
+        }
+      }
+    }
+  },
+  "sensitivity": {
+    "cache": {
+      "price_table": "gateway-illustrative",
+      "hit_rates": [
+        0.0,
+        0.1,
+        0.2,
+        0.3,
+        0.4,
+        0.5,
+        0.6
+      ],
+      "usd_per_answer": {
+        "all-large": [
+          0.014256289080338267,
+          0.012833602080338267,
+          0.011410915080338268,
+          0.009988228080338266,
+          0.008565541080338265,
+          0.007142854080338266,
+          0.005720167080338267
+        ],
+        "rules": [
+          0.0039807072471382664,
+          0.0035855784304582665,
+          0.0031904496137782666,
+          0.0027953207970982663,
+          0.0024001919804182664,
+          0.0020050631637382665,
+          0.0016099343470582664
+        ],
+        "logistic": [
+          0.0028531375319382664,
+          0.0025707656867782662,
+          0.0022883938416182665,
+          0.002006021996458266,
+          0.0017236501512982662,
+          0.0014412783061382663,
+          0.0011589064609782663
+        ],
+        "all-small": [
+          0.00047360460033826643,
+          0.0004291860483382664,
+          0.00038476749633826644,
+          0.0003403489443382664,
+          0.0002959303923382664,
+          0.0002515118403382664,
+          0.0002070932883382664
+        ]
+      }
+    },
+    "reviewers": {
+      "price_table": "gateway-illustrative",
+      "tier": "large",
+      "reviewers": [
+        1,
+        3,
+        5
+      ],
+      "by_accuracy": {
+        "0.6": {
+          "usd": [
+            0.029576879999999996,
+            0.07672152,
+            0.11389199999999998
+          ],
+          "usd_per_success": [
+            0.04235554919089216,
+            0.09299578181818183,
+            0.14148074534161487
+          ],
+          "success_rate": [
+            0.6983,
+            0.825,
+            0.805
+          ]
+        },
+        "0.7": {
+          "usd": [
+            0.02852712,
+            0.0679656,
+            0.09665928
+          ],
+          "usd_per_success": [
+            0.03618815171888875,
+            0.07524144802391232,
+            0.106605580677181
+          ],
+          "success_rate": [
+            0.7883,
+            0.9033,
+            0.9067
+          ]
+        },
+        "0.8": {
+          "usd": [
+            0.02747688,
+            0.059898480000000004,
+            0.07506408
+          ],
+          "usd_per_success": [
+            0.032013142257951765,
+            0.0634988656842998,
+            0.07752151192812146
+          ],
+          "success_rate": [
+            0.8583,
+            0.9433,
+            0.9683
+          ]
+        },
+        "0.9": {
+          "usd": [
+            0.026532720000000003,
+            0.050980080000000004,
+            0.06252888
+          ],
+          "usd_per_success": [
+            0.028277437919641907,
+            0.05193040643781196,
+            0.0634810964467005
+          ],
+          "success_rate": [
+            0.9383,
+            0.9817,
+            0.985
+          ]
+        }
+      },
+      "baselines": {
+        "single": {
+          "usd": 0.013843199999999998,
+          "usd_per_success": 0.02232774193548387
+        },
+        "coder-executor": {
+          "usd": 0.014933519999999999,
+          "usd_per_success": 0.020741
+        }
+      }
+    },
+    "crashes": {
+      "price_table": "gateway-illustrative",
+      "probabilities": [
+        0.0,
+        0.02,
+        0.05,
+        0.1,
+        0.15,
+        0.2,
+        0.25,
+        0.3
+      ],
+      "cost_multiplier": {
+        "research, durable": [
+          1.0,
+          1.0204081632653061,
+          1.0526315789473684,
+          1.1111111111111112,
+          1.1764705882352944,
+          1.2500000000000002,
+          1.3333333333333333,
+          1.4285714285714286
+        ],
+        "research, restart": [
+          1.0,
+          1.0639157017994416,
+          1.1704730696885588,
+          1.3822688300955088,
+          1.6487936842156796,
+          1.9890671857960742,
+          2.4306851380642733,
+          3.014725066196714
+        ],
+        "15 steps, durable": [
+          1.0,
+          1.0204081632653061,
+          1.0526315789473684,
+          1.1111111111111112,
+          1.1764705882352942,
+          1.25,
+          1.3333333333333333,
+          1.4285714285714286
+        ],
+        "15 steps, restart": [
+          1.0,
+          1.1798981590131692,
+          1.544626029017579,
+          2.5712904997459067,
+          4.643397322297147,
+          9.140569810134663,
+          19.688243701535363,
+          46.58543298283702
+        ]
+      }
+    }
+  },
+  "measurements": [
+    {
+      "id": "gateway.support.requests",
+      "value": 3000.0,
+      "unit": "requests",
+      "description": "Requests in the synthetic support workload",
+      "repo": "semantic-cache-gateway",
+      "path": "benchmarks/results/ablation.json",
+      "pointer": "/workloads/support/rows/0/requests",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "gateway.support.hit_rate.exact",
+      "value": 0.32233,
+      "unit": "share",
+      "description": "Exact-cache hit rate, support workload",
+      "repo": "semantic-cache-gateway",
+      "path": "benchmarks/results/ablation.json",
+      "pointer": "/workloads/support/rows/1/cache_hit_rate",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "gateway.support.hit_rate.exact_semantic",
+      "value": 0.47167,
+      "unit": "share",
+      "description": "Exact + semantic cache hit rate (bge-small, threshold 0.94, guard rails on), support workload",
+      "repo": "semantic-cache-gateway",
+      "path": "benchmarks/results/ablation.json",
+      "pointer": "/workloads/support/rows/2/cache_hit_rate",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "gateway.assistant.hit_rate.exact_semantic",
+      "value": 0.29433,
+      "unit": "share",
+      "description": "Exact + semantic cache hit rate, assistant workload",
+      "repo": "semantic-cache-gateway",
+      "path": "benchmarks/results/ablation.json",
+      "pointer": "/workloads/assistant/rows/2/cache_hit_rate",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "gateway.support.false_hit_rate",
+      "value": 0.004464,
+      "unit": "share of semantic hits",
+      "description": "Wrong answers among semantic hits at the default threshold, support workload",
+      "repo": "semantic-cache-gateway",
+      "path": "benchmarks/results/ablation.json",
+      "pointer": "/workloads/support/rows/2/false_hit_rate",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "gateway.support.routed.logistic.small",
+      "value": 1790.0,
+      "unit": "requests",
+      "description": "Requests routed to the small tier (cache + logistic router), support workload",
+      "repo": "semantic-cache-gateway",
+      "path": "benchmarks/results/ablation.json",
+      "pointer": "/workloads/support/rows/6/served_tiers/small",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "gateway.support.routed.logistic.medium",
+      "value": 825.0,
+      "unit": "requests",
+      "description": "Requests routed to the medium tier (cache + logistic router), support workload",
+      "repo": "semantic-cache-gateway",
+      "path": "benchmarks/results/ablation.json",
+      "pointer": "/workloads/support/rows/6/served_tiers/medium",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "gateway.support.routed.logistic.large",
+      "value": 385.0,
+      "unit": "requests",
+      "description": "Requests routed to the large tier (cache + logistic router), support workload",
+      "repo": "semantic-cache-gateway",
+      "path": "benchmarks/results/ablation.json",
+      "pointer": "/workloads/support/rows/6/served_tiers/large",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "gateway.support.routed.rules.small",
+      "value": 1256.0,
+      "unit": "requests",
+      "description": "Requests routed to the small tier (cache + rules router), support workload",
+      "repo": "semantic-cache-gateway",
+      "path": "benchmarks/results/ablation.json",
+      "pointer": "/workloads/support/rows/5/served_tiers/small",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "gateway.support.routed.rules.medium",
+      "value": 1169.0,
+      "unit": "requests",
+      "description": "Requests routed to the medium tier (cache + rules router), support workload",
+      "repo": "semantic-cache-gateway",
+      "path": "benchmarks/results/ablation.json",
+      "pointer": "/workloads/support/rows/5/served_tiers/medium",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "gateway.support.routed.rules.large",
+      "value": 575.0,
+      "unit": "requests",
+      "description": "Requests routed to the large tier (cache + rules router), support workload",
+      "repo": "semantic-cache-gateway",
+      "path": "benchmarks/results/ablation.json",
+      "pointer": "/workloads/support/rows/5/served_tiers/large",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "gateway.support.under_routed.logistic",
+      "value": 0.137,
+      "unit": "share",
+      "description": "Requests answered by a smaller tier than the author's label (cache + logistic router)",
+      "repo": "semantic-cache-gateway",
+      "path": "benchmarks/results/ablation.json",
+      "pointer": "/workloads/support/rows/6/under_routed_rate",
+      "derive": null,
+      "tolerance": 0.0005
+    },
+    {
+      "id": "gateway.support.under_routed.rules",
+      "value": 0.047,
+      "unit": "share",
+      "description": "Requests answered by a smaller tier than the author's label (cache + rules router)",
+      "repo": "semantic-cache-gateway",
+      "path": "benchmarks/results/ablation.json",
+      "pointer": "/workloads/support/rows/5/under_routed_rate",
+      "derive": null,
+      "tolerance": 0.0005
+    },
+    {
+      "id": "gateway.overhead.miss_p50_ms",
+      "value": 42.596,
+      "unit": "ms",
+      "description": "Time inside the gateway for a cache miss with a bge-small embedding (median)",
+      "repo": "semantic-cache-gateway",
+      "path": "benchmarks/results/overhead.json",
+      "pointer": "/profiles/0/paths/miss/p50_ms",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "gateway.overhead.exact_p50_ms",
+      "value": 0.3762,
+      "unit": "ms",
+      "description": "Time inside the gateway for an exact-cache hit (median)",
+      "repo": "semantic-cache-gateway",
+      "path": "benchmarks/results/overhead.json",
+      "pointer": "/profiles/0/paths/exact/p50_ms",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "rag.rewrite_rounds_mean",
+      "value": 0.42029,
+      "unit": "rounds per question",
+      "description": "Mean rewrite rounds per test question (histogram {0: 52, 1: 5, 2: 12})",
+      "repo": "self-correcting-agentic-rag",
+      "path": "benchmarks/results/benchmark-models.json",
+      "pointer": "/test_rewrites",
+      "derive": "histogram_mean",
+      "tolerance": null
+    },
+    {
+      "id": "rag.latency_agentic_mean_ms",
+      "value": 1660.368,
+      "unit": "ms",
+      "description": "Mean CPU time per question of the agentic pipeline (embeddings + cross-encoder, extractive writer)",
+      "repo": "self-correcting-agentic-rag",
+      "path": "benchmarks/results/benchmark-models.json",
+      "pointer": "/latency_ms/agentic_mean",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "rag.latency_naive_mean_ms",
+      "value": 325.685,
+      "unit": "ms",
+      "description": "Mean CPU time per question of naive RAG",
+      "repo": "self-correcting-agentic-rag",
+      "path": "benchmarks/results/benchmark-models.json",
+      "pointer": "/latency_ms/naive_mean",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "assembler.scenario_tokens_mean",
+      "value": 5105.0,
+      "unit": "tokens",
+      "description": "Mean size of the synthetic support conversations before assembly",
+      "repo": "context-assembler-engine",
+      "path": "benchmarks/results/benchmark.json",
+      "pointer": "/scenario_source_tokens/mean",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "assembler.retention_at_2048",
+      "value": 95.4,
+      "unit": "percent",
+      "description": "Required-fact retention of the engine at a 2,048-token prompt budget",
+      "repo": "context-assembler-engine",
+      "path": "benchmarks/results/benchmark.json",
+      "pointer": "/per_budget/engine/2048/fact_retention_pct",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "assembler.retention_at_3072",
+      "value": 100.0,
+      "unit": "percent",
+      "description": "Required-fact retention of the engine at a 3,072-token prompt budget",
+      "repo": "context-assembler-engine",
+      "path": "benchmarks/results/benchmark.json",
+      "pointer": "/per_budget/engine/3072/fact_retention_pct",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "assembler.latency_p50_ms",
+      "value": 37.6,
+      "unit": "ms",
+      "description": "Median assembly time (busy laptop CPU)",
+      "repo": "context-assembler-engine",
+      "path": "benchmarks/results/benchmark.json",
+      "pointer": "/overall/engine/latency_p50_ms",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "memory.turns",
+      "value": 7568.0,
+      "unit": "turns",
+      "description": "Conversation turns in the benchmark (50 users x 10 sessions)",
+      "repo": "three-tier-agent-memory",
+      "path": "benchmarks/results/benchmark.json",
+      "pointer": "/meta/turns",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "memory.sessions",
+      "value": 500.0,
+      "unit": "sessions",
+      "description": "Sessions consolidated into episodes",
+      "repo": "three-tier-agent-memory",
+      "path": "benchmarks/results/benchmark.json",
+      "pointer": "/consolidation/episodes",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "memory.consolidation_raw_tokens",
+      "value": 56609.0,
+      "unit": "tokens",
+      "description": "Raw tokens flushed to consolidation over all sessions (approximate counter)",
+      "repo": "three-tier-agent-memory",
+      "path": "benchmarks/results/benchmark.json",
+      "pointer": "/consolidation/raw_tokens",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "memory.recall_p50_ms",
+      "value": 1.65,
+      "unit": "ms",
+      "description": "Median tiered recall time, retrieval only",
+      "repo": "three-tier-agent-memory",
+      "path": "benchmarks/results/benchmark.json",
+      "pointer": "/systems/2/latency_ms_p50",
+      "derive": null,
+      "tolerance": 0.005
+    },
+    {
+      "id": "memory.embed_p50_ms",
+      "value": 23.559,
+      "unit": "ms",
+      "description": "Median time to embed the recall query with bge-small",
+      "repo": "three-tier-agent-memory",
+      "path": "benchmarks/results/benchmark.json",
+      "pointer": "/meta/question_embedding_ms_p50",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "proxy.screen_hashing_short_p50_ms",
+      "value": 3.7,
+      "unit": "ms",
+      "description": "Full screening of a short message with the hashing classifier (median)",
+      "repo": "inter-agent-security-proxy",
+      "path": "benchmarks/results/latency.json",
+      "pointer": "/groups/short messages/stages/full screen with hashing (detect + mask + spotlight)/p50_ms",
+      "derive": null,
+      "tolerance": 0.05
+    },
+    {
+      "id": "proxy.screen_bge_short_p50_ms",
+      "value": 34.4,
+      "unit": "ms",
+      "description": "Full screening of a short message with the bge-small classifier (median)",
+      "repo": "inter-agent-security-proxy",
+      "path": "benchmarks/results/latency.json",
+      "pointer": "/groups/short messages/stages/full screen with bge-small (detect + mask + spotlight)/p50_ms",
+      "derive": null,
+      "tolerance": 0.05
+    },
+    {
+      "id": "mcp.calculate_p50_ms",
+      "value": 1.077,
+      "unit": "ms",
+      "description": "tools/call round trip over stdio (median)",
+      "repo": "raw-mcp-tool-server",
+      "path": "benchmarks/results/stdio_benchmark.json",
+      "pointer": "/latency/rawmcp \u00b7 calculate (2026-07-28)/p50_ms",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "mcp.run_python_p50_ms",
+      "value": 305.154,
+      "unit": "ms",
+      "description": "run_python in the subprocess sandbox over stdio (median, Windows process start-up)",
+      "repo": "raw-mcp-tool-server",
+      "path": "benchmarks/results/stdio_benchmark.json",
+      "pointer": "/latency/rawmcp \u00b7 run_python sandbox (2026-07-28)/p50_ms",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "durable.step_overhead_ms",
+      "value": 1.971,
+      "unit": "ms per step",
+      "description": "Median cost of one durable step (synchronous=NORMAL, checkpoint every transition)",
+      "repo": "durable-agent-state-machine",
+      "path": "benchmarks/results/overhead.json",
+      "pointer": "/per_step/0/ms_per_step",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "durable.chaos.runs",
+      "value": 756.0,
+      "unit": "runs",
+      "description": "Runs in the chaos benchmark (outbox)",
+      "repo": "durable-agent-state-machine",
+      "path": "benchmarks/results/chaos.json",
+      "pointer": "/outbox/runs",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "durable.chaos.kills",
+      "value": 200.0,
+      "unit": "kills",
+      "description": "Worker processes killed",
+      "repo": "durable-agent-state-machine",
+      "path": "benchmarks/results/chaos.json",
+      "pointer": "/outbox/kills",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "durable.chaos.in_doubt_attempts",
+      "value": 89.0,
+      "unit": "attempts",
+      "description": "Interrupted attempts re-run after a takeover (WorkerLost)",
+      "repo": "durable-agent-state-machine",
+      "path": "benchmarks/results/chaos.json",
+      "pointer": "/outbox/in_doubt_attempts",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "durable.chaos.completed_step_reexecutions",
+      "value": 0.0,
+      "unit": "steps",
+      "description": "Completed steps executed again after a crash",
+      "repo": "durable-agent-state-machine",
+      "path": "benchmarks/results/chaos.json",
+      "pointer": "/outbox/completed_step_reexecutions",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "durable.chaos.direct_duplicates",
+      "value": 10.0,
+      "unit": "runs",
+      "description": "Runs published twice when the side effect is called directly (baseline)",
+      "repo": "durable-agent-state-machine",
+      "path": "benchmarks/results/chaos.json",
+      "pointer": "/direct/duplicate_publications",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "trajectory.run.llm_calls",
+      "value": 5.9,
+      "unit": "calls per run",
+      "description": "LLM turns per run of the scripted travel-desk agent (mean over 100 baseline runs)",
+      "repo": "trajectory-eval-gate",
+      "path": "examples/travel_desk/baseline.jsonl",
+      "pointer": null,
+      "derive": "trajectory_llm_calls_per_run",
+      "tolerance": null
+    },
+    {
+      "id": "trajectory.run.tokens_in",
+      "value": 4481.59,
+      "unit": "tokens per run",
+      "description": "Input tokens per run (simulated by the scripted agent, mean over 100 baseline runs)",
+      "repo": "trajectory-eval-gate",
+      "path": "examples/travel_desk/baseline.jsonl",
+      "pointer": null,
+      "derive": "trajectory_tokens_in_per_run",
+      "tolerance": null
+    },
+    {
+      "id": "trajectory.run.tokens_out",
+      "value": 252.1,
+      "unit": "tokens per run",
+      "description": "Output tokens per run (simulated by the scripted agent, mean over 100 baseline runs)",
+      "repo": "trajectory-eval-gate",
+      "path": "examples/travel_desk/baseline.jsonl",
+      "pointer": null,
+      "derive": "trajectory_tokens_out_per_run",
+      "tolerance": null
+    },
+    {
+      "id": "trajectory.grade_ms_mean",
+      "value": 6.89,
+      "unit": "ms",
+      "description": "Mean time to grade one trajectory against its golden DAG",
+      "repo": "trajectory-eval-gate",
+      "path": "benchmarks/results/benchmark.json",
+      "pointer": "/runtime/grade_ms_per_trajectory_mean",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.r1.a0.6.calls",
+      "value": 4.5417,
+      "unit": "calls",
+      "description": "Agent calls per task",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/grid~1r1~1a0.6/metrics/calls_mean",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.r1.a0.6.tokens",
+      "value": 2594.0,
+      "unit": "tokens",
+      "description": "Payload tokens per task",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/grid~1r1~1a0.6/metrics/tokens_mean",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.r1.a0.6.success",
+      "value": 0.6983,
+      "unit": "share",
+      "description": "Tasks ending with a correct accepted solution",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/grid~1r1~1a0.6/metrics/success_rate",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.r1.a0.7.calls",
+      "value": 4.3983,
+      "unit": "calls",
+      "description": "Agent calls per task",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/grid~1r1~1a0.7/metrics/calls_mean",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.r1.a0.7.tokens",
+      "value": 2496.0,
+      "unit": "tokens",
+      "description": "Payload tokens per task",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/grid~1r1~1a0.7/metrics/tokens_mean",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.r1.a0.7.success",
+      "value": 0.7883,
+      "unit": "share",
+      "description": "Tasks ending with a correct accepted solution",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/grid~1r1~1a0.7/metrics/success_rate",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.r1.a0.8.calls",
+      "value": 4.2517,
+      "unit": "calls",
+      "description": "Agent calls per task",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/grid~1r1~1a0.8/metrics/calls_mean",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.r1.a0.8.tokens",
+      "value": 2399.0,
+      "unit": "tokens",
+      "description": "Payload tokens per task",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/grid~1r1~1a0.8/metrics/tokens_mean",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.r1.a0.8.success",
+      "value": 0.8583,
+      "unit": "share",
+      "description": "Tasks ending with a correct accepted solution",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/grid~1r1~1a0.8/metrics/success_rate",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.r1.a0.9.calls",
+      "value": 4.1283,
+      "unit": "calls",
+      "description": "Agent calls per task",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/grid~1r1~1a0.9/metrics/calls_mean",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.r1.a0.9.tokens",
+      "value": 2309.0,
+      "unit": "tokens",
+      "description": "Payload tokens per task",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/grid~1r1~1a0.9/metrics/tokens_mean",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.r1.a0.9.success",
+      "value": 0.9383,
+      "unit": "share",
+      "description": "Tasks ending with a correct accepted solution",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/grid~1r1~1a0.9/metrics/success_rate",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.r3.a0.6.calls",
+      "value": 11.3633,
+      "unit": "calls",
+      "description": "Agent calls per task",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/grid~1r3~1a0.6/metrics/calls_mean",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.r3.a0.6.tokens",
+      "value": 6868.0,
+      "unit": "tokens",
+      "description": "Payload tokens per task",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/grid~1r3~1a0.6/metrics/tokens_mean",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.r3.a0.6.success",
+      "value": 0.825,
+      "unit": "share",
+      "description": "Tasks ending with a correct accepted solution",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/grid~1r3~1a0.6/metrics/success_rate",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.r3.a0.7.calls",
+      "value": 10.19,
+      "unit": "calls",
+      "description": "Agent calls per task",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/grid~1r3~1a0.7/metrics/calls_mean",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.r3.a0.7.tokens",
+      "value": 6043.0,
+      "unit": "tokens",
+      "description": "Payload tokens per task",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/grid~1r3~1a0.7/metrics/tokens_mean",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.r3.a0.7.success",
+      "value": 0.9033,
+      "unit": "share",
+      "description": "Tasks ending with a correct accepted solution",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/grid~1r3~1a0.7/metrics/success_rate",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.r3.a0.8.calls",
+      "value": 9.0967,
+      "unit": "calls",
+      "description": "Agent calls per task",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/grid~1r3~1a0.8/metrics/calls_mean",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.r3.a0.8.tokens",
+      "value": 5287.0,
+      "unit": "tokens",
+      "description": "Payload tokens per task",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/grid~1r3~1a0.8/metrics/tokens_mean",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.r3.a0.8.success",
+      "value": 0.9433,
+      "unit": "share",
+      "description": "Tasks ending with a correct accepted solution",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/grid~1r3~1a0.8/metrics/success_rate",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.r3.a0.9.calls",
+      "value": 7.9217,
+      "unit": "calls",
+      "description": "Agent calls per task",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/grid~1r3~1a0.9/metrics/calls_mean",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.r3.a0.9.tokens",
+      "value": 4440.0,
+      "unit": "tokens",
+      "description": "Payload tokens per task",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/grid~1r3~1a0.9/metrics/tokens_mean",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.r3.a0.9.success",
+      "value": 0.9817,
+      "unit": "share",
+      "description": "Tasks ending with a correct accepted solution",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/grid~1r3~1a0.9/metrics/success_rate",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.r5.a0.6.calls",
+      "value": 16.255,
+      "unit": "calls",
+      "description": "Agent calls per task",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/grid~1r5~1a0.6/metrics/calls_mean",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.r5.a0.6.tokens",
+      "value": 10400.0,
+      "unit": "tokens",
+      "description": "Payload tokens per task",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/grid~1r5~1a0.6/metrics/tokens_mean",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.r5.a0.6.success",
+      "value": 0.805,
+      "unit": "share",
+      "description": "Tasks ending with a correct accepted solution",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/grid~1r5~1a0.6/metrics/success_rate",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.r5.a0.7.calls",
+      "value": 14.1267,
+      "unit": "calls",
+      "description": "Agent calls per task",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/grid~1r5~1a0.7/metrics/calls_mean",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.r5.a0.7.tokens",
+      "value": 8716.0,
+      "unit": "tokens",
+      "description": "Payload tokens per task",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/grid~1r5~1a0.7/metrics/tokens_mean",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.r5.a0.7.success",
+      "value": 0.9067,
+      "unit": "share",
+      "description": "Tasks ending with a correct accepted solution",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/grid~1r5~1a0.7/metrics/success_rate",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.r5.a0.8.calls",
+      "value": 11.4617,
+      "unit": "calls",
+      "description": "Agent calls per task",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/grid~1r5~1a0.8/metrics/calls_mean",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.r5.a0.8.tokens",
+      "value": 6605.0,
+      "unit": "tokens",
+      "description": "Payload tokens per task",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/grid~1r5~1a0.8/metrics/tokens_mean",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.r5.a0.8.success",
+      "value": 0.9683,
+      "unit": "share",
+      "description": "Tasks ending with a correct accepted solution",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/grid~1r5~1a0.8/metrics/success_rate",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.r5.a0.9.calls",
+      "value": 9.9767,
+      "unit": "calls",
+      "description": "Agent calls per task",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/grid~1r5~1a0.9/metrics/calls_mean",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.r5.a0.9.tokens",
+      "value": 5359.0,
+      "unit": "tokens",
+      "description": "Payload tokens per task",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/grid~1r5~1a0.9/metrics/tokens_mean",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.r5.a0.9.success",
+      "value": 0.985,
+      "unit": "share",
+      "description": "Tasks ending with a correct accepted solution",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/grid~1r5~1a0.9/metrics/success_rate",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.single.calls",
+      "value": 2.165,
+      "unit": "calls",
+      "description": "Agent calls per task, single coder",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/topology~1single/metrics/calls_mean",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.single.tokens",
+      "value": 1201.0,
+      "unit": "tokens",
+      "description": "Payload tokens per task, single coder",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/topology~1single/metrics/tokens_mean",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.single.success",
+      "value": 0.62,
+      "unit": "share",
+      "description": "Correct accepted solutions, single coder",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/topology~1single/metrics/success_rate",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.coder_executor.calls",
+      "value": 2.2983,
+      "unit": "calls",
+      "description": "Agent calls per task, coder + executor",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/topology~1coder-executor/metrics/calls_mean",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.coder_executor.tokens",
+      "value": 1308.0,
+      "unit": "tokens",
+      "description": "Payload tokens per task, coder + executor",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/topology~1coder-executor/metrics/tokens_mean",
+      "derive": null,
+      "tolerance": null
+    },
+    {
+      "id": "swarm.coder_executor.success",
+      "value": 0.72,
+      "unit": "share",
+      "description": "Correct accepted solutions, coder + executor",
+      "repo": "typed-multi-agent-swarm",
+      "path": "benchmarks/results/swarm_benchmark.json",
+      "pointer": "/experiments/topology~1coder-executor/metrics/success_rate",
+      "derive": null,
+      "tolerance": null
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "support.prompt_tokens",
+      "value": 3072.0,
+      "unit": "tokens",
+      "rationale": "Prompt budget for one support answer: the smallest budget at which the context assembler kept every planted fact in its benchmark (measurement assembler.retention_at_3072)."
+    },
+    {
+      "id": "support.answer_tokens",
+      "value": 250.0,
+      "unit": "tokens",
+      "rationale": "Mean answer length. The agentic RAG generator caps answers at max_tokens=500 (generate.py); half of the cap is assumed."
+    },
+    {
+      "id": "support.rewrite_input_tokens",
+      "value": 400.0,
+      "unit": "tokens",
+      "rationale": "An LLM query rewrite sees the question, the grader's diagnosis and an instruction block; no repository measures it."
+    },
+    {
+      "id": "support.rewrite_output_tokens",
+      "value": 120.0,
+      "unit": "tokens",
+      "rationale": "A few rewritten queries returned as JSON."
+    },
+    {
+      "id": "memory.llm_calls_per_session",
+      "value": 2.0,
+      "unit": "calls",
+      "rationale": "With a key, consolidation runs an LLM summary and an LLM fact extraction; one consolidation per session is assumed."
+    },
+    {
+      "id": "memory.prompt_overhead_tokens",
+      "value": 400.0,
+      "unit": "tokens",
+      "rationale": "Instructions and output schema around the flushed turns of a consolidation call."
+    },
+    {
+      "id": "memory.output_tokens",
+      "value": 150.0,
+      "unit": "tokens",
+      "rationale": "A short summary or a JSON list of facts."
+    },
+    {
+      "id": "swarm.system_prompt_tokens",
+      "value": 800.0,
+      "unit": "tokens per call",
+      "rationale": "Role instructions plus the JSON schema of the expected artifact, which the offline payload estimate leaves out. Order of magnitude implied by agents/prompts.py, not measured."
+    },
+    {
+      "id": "swarm.output_share",
+      "value": 0.35,
+      "unit": "share of payload tokens",
+      "rationale": "The swarm reports request + reply tokens as one number; replies (code, votes) are assumed to be 35% of it."
+    },
+    {
+      "id": "research.plan_input_tokens",
+      "value": 1200.0,
+      "unit": "tokens",
+      "rationale": "Brief, instructions and the plan schema."
+    },
+    {
+      "id": "research.plan_output_tokens",
+      "value": 300.0,
+      "unit": "tokens",
+      "rationale": "A handful of research questions."
+    },
+    {
+      "id": "research.draft_input_tokens",
+      "value": 8192.0,
+      "unit": "tokens",
+      "rationale": "Draft prompt filled to the largest budget of the context assembler's sweep (8,192), where its fact retention is 100%."
+    },
+    {
+      "id": "research.draft_output_tokens",
+      "value": 1200.0,
+      "unit": "tokens",
+      "rationale": "A one-page brief."
+    },
+    {
+      "id": "gate.cases",
+      "value": 5.0,
+      "unit": "cases",
+      "rationale": "The travel-desk suite has five cases (trajectory-eval-gate benchmark setup)."
+    },
+    {
+      "id": "gate.candidate_runs_per_case",
+      "value": 3.0,
+      "unit": "runs",
+      "rationale": "Runs per case for each pull request, as in the trajectory-eval-gate benchmark (benchmark.json /setup/candidate_run_set)."
+    },
+    {
+      "id": "gate.baseline_runs_per_case",
+      "value": 20.0,
+      "unit": "runs",
+      "rationale": "Baseline runs per case, as in the trajectory-eval-gate benchmark."
+    },
+    {
+      "id": "gate.prs_per_baseline",
+      "value": 20.0,
+      "unit": "pull requests",
+      "rationale": "The baseline is re-recorded once every 20 merged pull requests, so its cost is spread over 20."
+    },
+    {
+      "id": "gate.judge_input_tokens",
+      "value": 900.0,
+      "unit": "tokens",
+      "rationale": "Only for the optional LLM judge: rubric, facts and the final reply."
+    },
+    {
+      "id": "gate.judge_output_tokens",
+      "value": 150.0,
+      "unit": "tokens",
+      "rationale": "A JSON verdict with a short rationale."
+    }
+  ]
+}

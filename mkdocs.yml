@@ -1,0 +1,128 @@
+site_name: AI Architecture Teardown
+site_description: >-
+  Eleven independent AI-engineering systems taken apart and put back together: reference architecture, per-system
+  deep-dives, swarm topologies, cost per task, reproducible benchmarks and architecture decision records.
+site_author: Abhishek Kumar
+site_url: https://iamsammy-ak.github.io/ai-architecture-teardown/
+repo_url: https://github.com/iamsammy-ak/ai-architecture-teardown
+repo_name: iamsammy-ak/ai-architecture-teardown
+edit_uri: blob/main/docs/
+copyright: MIT licence · © 2026 Abhishek Kumar
+
+theme:
+  name: material
+  language: en
+  icon:
+    repo: fontawesome/brands/github
+    logo: material/sitemap-outline
+  favicon: assets/favicon.svg
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  font:
+    text: Inter
+    code: JetBrains Mono
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - navigation.footer
+    - navigation.path
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
+  anchors: warn
+
+extra_css:
+  - stylesheets/extra.css
+
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets:
+      base_path: ["."]
+      check_paths: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+
+nav:
+  - Home: index.md
+  - Reference architecture: architecture.md
+  - Systems:
+      - systems/index.md
+      - Edge and safety:
+          - Semantic cache gateway: systems/semantic-cache-gateway.md
+          - Inter-agent security proxy: systems/inter-agent-security-proxy.md
+      - Context and knowledge:
+          - Context assembler engine: systems/context-assembler-engine.md
+          - Three-tier agent memory: systems/three-tier-agent-memory.md
+          - Hybrid rerank retrieval: systems/hybrid-rerank-retrieval.md
+          - GraphRAG knowledge pipeline: systems/graphrag-knowledge-pipeline.md
+          - Self-correcting agentic RAG: systems/self-correcting-agentic-rag.md
+      - Agents and execution:
+          - Typed multi-agent swarm: systems/typed-multi-agent-swarm.md
+          - Durable agent state machine: systems/durable-agent-state-machine.md
+          - Raw MCP tool server: systems/raw-mcp-tool-server.md
+      - Quality:
+          - Trajectory eval gate: systems/trajectory-eval-gate.md
+  - Swarm topologies: swarm-topologies.md
+  - Cost per task: cost.md
+  - Reproducible benchmarks: benchmarks.md
+  - Decisions:
+      - adr/index.md
+      - adr/0001-explicit-state-machines.md
+      - adr/0002-offline-first-stand-ins.md
+      - adr/0003-sqlite-wal-durable-store.md
+      - adr/0004-transactional-outbox.md
+      - adr/0005-leases-with-fencing.md
+      - adr/0006-partial-order-trajectory-specs.md
+      - adr/0007-guard-rails-over-similarity-threshold.md
+      - adr/0008-mcp-without-sdk.md
+      - adr/0009-hmac-pii-tokens.md
+      - adr/0010-versioned-facts.md
+      - adr/0011-hash-chained-audit-log.md
+      - adr/0012-verified-token-budget.md
+      - adr/0013-typed-handoffs-bounded-repair.md
+      - adr/0014-security-veto-and-grounded-debate.md
+      - adr/0015-exact-search-at-small-scale.md
+      - adr/0016-rank-fusion-over-score-mixing.md
+  - Lessons: lessons.md

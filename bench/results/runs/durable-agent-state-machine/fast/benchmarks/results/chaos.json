@@ -1,0 +1,344 @@
+{
+ "command": "PYTHONPATH=src python benchmarks/chaos_bench.py --runs 12 --crashes 6 --workers 2 --seed 7 --lease-ttl 1",
+ "environment": {
+  "python": "3.13.2",
+  "sqlite": "3.45.3",
+  "os": "Windows 11",
+  "cpu_count": 12
+ },
+ "outbox": {
+  "config": {
+   "runs": 12,
+   "crashes": 6,
+   "max_runs": 5000,
+   "workers": 2,
+   "standby_workers": 1,
+   "seed": 7,
+   "lease_ttl": 1.0,
+   "poll": 0.05,
+   "publish_mode": "outbox",
+   "failure_rate": 0.3,
+   "random_kill_share": 0.25,
+   "random_kill_window": [
+    0.05,
+    1.5
+   ],
+   "plan_patience": 6.0,
+   "search_latency": 0.05,
+   "decision_weights": {
+    "approve": 0.7,
+    "edit": 0.15,
+    "reject": 0.1,
+    "none": 0.05
+   },
+   "approval_timeout": 4.0,
+   "escalation_timeout": 2.0,
+   "max_seconds": 3600.0
+  },
+  "wall_seconds": 10.85,
+  "timed_out": false,
+  "runs": 21,
+  "finished": 21,
+  "as_expected": 21,
+  "completion_rate": 1.0,
+  "outcomes": {
+   "completed:done": 18,
+   "completed:rejected": 3
+  },
+  "unexpected_runs": [],
+  "decisions": {
+   "none": 2,
+   "edit": 6,
+   "approve": 12,
+   "reject": 1
+  },
+  "workers_spawned": 9,
+  "kills": 6,
+  "kills_by_kind": {
+   "crash_point": 3,
+   "random_time": 3
+  },
+  "kills_by_point": {
+   "outbox.after_deliver": 1,
+   "random": 3,
+   "run.after_claim": 1,
+   "step.after_start": 1
+  },
+  "kills_holding_a_run": 5,
+  "recovery_seconds": [
+   0.8373,
+   0.9831,
+   1.0294,
+   1.0463,
+   1.2876
+  ],
+  "recovery": {
+   "count": 5,
+   "mean": 1.0367,
+   "p50": 1.0294,
+   "p95": 1.2876,
+   "max": 1.2876
+  },
+  "replay_ms": {
+   "count": 5,
+   "mean": 0.9858,
+   "p50": 0.761,
+   "p95": 1.558,
+   "max": 1.558
+  },
+  "articles": 18,
+  "cms_calls": 19,
+  "redeliveries_absorbed": 1,
+  "duplicate_publications": 0,
+  "missing_publications": 0,
+  "content_mismatches": 0,
+  "events": 503,
+  "checkpoints": 104,
+  "activity_executions": 92,
+  "in_doubt_attempts": 4,
+  "completed_step_reexecutions": 0,
+  "failures_by_type": {
+   "WorkerLost": 4,
+   "RateLimited": 3,
+   "ActivityTimeout": 3,
+   "SearchUnavailable": 1
+  },
+  "gather_attempts_histogram": {
+   "1": 14,
+   "2": 5,
+   "3": 1,
+   "4": 1
+  },
+  "retries_exhausted": 0,
+  "violations": [],
+  "kill_log": [
+   {
+    "worker": "w001",
+    "kind": "crash_point",
+    "plan": "step.after_start@publish:1",
+    "reached": "step.after_start publish#1",
+    "at": 1795204830.8287694,
+    "held_runs": [
+     "chaos-0003"
+    ],
+    "held_messages": []
+   },
+   {
+    "worker": "w002",
+    "kind": "random_time",
+    "plan": "0.83s after ready",
+    "reached": null,
+    "at": 1795204831.4669158,
+    "held_runs": [
+     "chaos-0013"
+    ],
+    "held_messages": []
+   },
+   {
+    "worker": "w004",
+    "kind": "crash_point",
+    "plan": "run.after_claim:1",
+    "reached": "run.after_claim publish#1",
+    "at": 1795204832.1445618,
+    "held_runs": [
+     "chaos-0003"
+    ],
+    "held_messages": []
+   },
+   {
+    "worker": "w005",
+    "kind": "random_time",
+    "plan": "0.68s after ready",
+    "reached": null,
+    "at": 1795204833.1058238,
+    "held_runs": [
+     "chaos-0019"
+    ],
+    "held_messages": []
+   },
+   {
+    "worker": "w006",
+    "kind": "random_time",
+    "plan": "0.18s after ready",
+    "reached": null,
+    "at": 1795204833.2518377,
+    "held_runs": [
+     "chaos-0020"
+    ],
+    "held_messages": []
+   },
+   {
+    "worker": "w007",
+    "kind": "crash_point",
+    "plan": "outbox.after_deliver:1",
+    "reached": "outbox.after_deliver publish#1",
+    "at": 1795204834.25462,
+    "held_runs": [],
+    "held_messages": [
+     "chaos-0020/publish#1/0"
+    ]
+   }
+  ]
+ },
+ "direct": {
+  "config": {
+   "runs": 12,
+   "crashes": 6,
+   "max_runs": 5000,
+   "workers": 2,
+   "standby_workers": 1,
+   "seed": 7,
+   "lease_ttl": 1.0,
+   "poll": 0.05,
+   "publish_mode": "direct",
+   "failure_rate": 0.3,
+   "random_kill_share": 0.25,
+   "random_kill_window": [
+    0.05,
+    1.5
+   ],
+   "plan_patience": 6.0,
+   "search_latency": 0.05,
+   "decision_weights": {
+    "approve": 0.7,
+    "edit": 0.15,
+    "reject": 0.1,
+    "none": 0.05
+   },
+   "approval_timeout": 4.0,
+   "escalation_timeout": 2.0,
+   "max_seconds": 3600.0
+  },
+  "wall_seconds": 9.49,
+  "timed_out": false,
+  "runs": 22,
+  "finished": 22,
+  "as_expected": 22,
+  "completion_rate": 1.0,
+  "outcomes": {
+   "completed:done": 19,
+   "completed:rejected": 3
+  },
+  "unexpected_runs": [],
+  "decisions": {
+   "none": 2,
+   "edit": 6,
+   "approve": 13,
+   "reject": 1
+  },
+  "workers_spawned": 8,
+  "kills": 5,
+  "kills_by_kind": {
+   "crash_point": 2,
+   "random_time": 3
+  },
+  "kills_by_point": {
+   "random": 3,
+   "run.after_claim": 1,
+   "step.after_start": 1
+  },
+  "kills_holding_a_run": 5,
+  "recovery_seconds": [
+   0.8306,
+   0.9426,
+   1.0052,
+   1.0492,
+   1.3907
+  ],
+  "recovery": {
+   "count": 5,
+   "mean": 1.0437,
+   "p50": 1.0052,
+   "p95": 1.3907,
+   "max": 1.3907
+  },
+  "replay_ms": {
+   "count": 5,
+   "mean": 2.2322,
+   "p50": 1.31,
+   "p95": 6.661,
+   "max": 6.661
+  },
+  "articles": 19,
+  "cms_calls": 19,
+  "redeliveries_absorbed": 0,
+  "duplicate_publications": 0,
+  "missing_publications": 0,
+  "content_mismatches": 0,
+  "events": 525,
+  "checkpoints": 109,
+  "activity_executions": 96,
+  "in_doubt_attempts": 4,
+  "completed_step_reexecutions": 0,
+  "failures_by_type": {
+   "WorkerLost": 4,
+   "RateLimited": 3,
+   "ActivityTimeout": 3,
+   "SearchUnavailable": 1
+  },
+  "gather_attempts_histogram": {
+   "1": 16,
+   "2": 4,
+   "4": 2
+  },
+  "retries_exhausted": 0,
+  "violations": [],
+  "kill_log": [
+   {
+    "worker": "w001",
+    "kind": "crash_point",
+    "plan": "step.after_start@publish:1",
+    "reached": "step.after_start publish#1",
+    "at": 1795204841.7974958,
+    "held_runs": [
+     "chaos-0003"
+    ],
+    "held_messages": []
+   },
+   {
+    "worker": "w002",
+    "kind": "random_time",
+    "plan": "0.83s after ready",
+    "reached": null,
+    "at": 1795204842.4169128,
+    "held_runs": [
+     "chaos-0012"
+    ],
+    "held_messages": []
+   },
+   {
+    "worker": "w004",
+    "kind": "crash_point",
+    "plan": "run.after_claim:1",
+    "reached": "run.after_claim approval#1",
+    "at": 1795204842.7482026,
+    "held_runs": [
+     "chaos-0011"
+    ],
+    "held_messages": []
+   },
+   {
+    "worker": "w006",
+    "kind": "random_time",
+    "plan": "0.18s after ready",
+    "reached": null,
+    "at": 1795204843.8793519,
+    "held_runs": [
+     "chaos-0014"
+    ],
+    "held_messages": []
+   },
+   {
+    "worker": "w005",
+    "kind": "random_time",
+    "plan": "0.68s after ready",
+    "reached": null,
+    "at": 1795204844.0557072,
+    "held_runs": [
+     "chaos-0020"
+    ],
+    "held_messages": []
+   }
+  ]
+ }
+}

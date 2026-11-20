@@ -1,0 +1,736 @@
+{
+  "meta": {
+    "command": "python benchmarks/run_benchmarks.py --seeds 2",
+    "generated": "2026-11-20",
+    "python": "3.13.2",
+    "tasks": 20,
+    "candidates": 89,
+    "seeds": 2,
+    "episodes_per_config": 40,
+    "veto_episodes_per_config": 24,
+    "mode": "offline simulation: agent competence is an input, the orchestration is what is measured",
+    "simulation_defaults": {
+      "coder_skill": 0.5,
+      "brief_effect": 0.3,
+      "fix_rate": 0.6,
+      "malformed_rate": 0.05,
+      "repair_success": 0.8,
+      "counterexample_rate": 0.7,
+      "bogus_counterexample_rate": 0.3,
+      "persuasion": 0.9,
+      "conformity": 0.2,
+      "error_correlation": 0.0
+    },
+    "budget_defaults": {
+      "max_rounds": 3,
+      "max_agent_calls": 50,
+      "max_tokens": 150000,
+      "max_seconds": 300.0,
+      "max_debate_rounds": 1,
+      "max_repairs": 2
+    },
+    "consensus_defaults": {
+      "rule": "majority",
+      "quorum": null,
+      "split_threshold": 0.75,
+      "security_veto": true,
+      "veto_min_severity": "major"
+    },
+    "heterogeneous_panel_accuracy": [
+      0.9,
+      0.65,
+      0.6
+    ],
+    "calibration_seeds": 2
+  },
+  "calibrated_reliability": {
+    "reviewer-1": 0.8689,
+    "reviewer-2": 0.6885,
+    "reviewer-3": 0.6393
+  },
+  "experiments": {
+    "grid/r1/a0.6": {
+      "group": "grid",
+      "label": "1 reviewer @ 0.6",
+      "metrics": {
+        "episodes": 40,
+        "accept_rate": 0.9,
+        "correctness": 0.8611,
+        "correctness_ci95": [
+          0.7134,
+          0.9392
+        ],
+        "success_rate": 0.775,
+        "insecure_accepted": 0,
+        "calls_mean": 4.375,
+        "calls_p90": 7,
+        "executor_runs_mean": 1.65,
+        "tokens_mean": 2516,
+        "repairs_mean": 0.325,
+        "rounds_mean": 1.65,
+        "budget_exhausted": 0,
+        "review_cycles": 56,
+        "decision_accuracy": 0.6607,
+        "split_cycles": 0,
+        "split_decision_accuracy": 0.0,
+        "votes_changed_in_debate": 0,
+        "insecure_reviews": 0,
+        "insecure_approved": 0
+      }
+    },
+    "grid/r1/a0.7": {
+      "group": "grid",
+      "label": "1 reviewer @ 0.7",
+      "metrics": {
+        "episodes": 40,
+        "accept_rate": 0.95,
+        "correctness": 0.8684,
+        "correctness_ci95": [
+          0.7267,
+          0.9425
+        ],
+        "success_rate": 0.825,
+        "insecure_accepted": 0,
+        "calls_mean": 3.9,
+        "calls_p90": 5,
+        "executor_runs_mean": 1.425,
+        "tokens_mean": 2164,
+        "repairs_mean": 0.25,
+        "rounds_mean": 1.425,
+        "budget_exhausted": 0,
+        "review_cycles": 49,
+        "decision_accuracy": 0.7755,
+        "split_cycles": 0,
+        "split_decision_accuracy": 0.0,
+        "votes_changed_in_debate": 0,
+        "insecure_reviews": 0,
+        "insecure_approved": 0
+      }
+    },
+    "grid/r1/a0.8": {
+      "group": "grid",
+      "label": "1 reviewer @ 0.8",
+      "metrics": {
+        "episodes": 40,
+        "accept_rate": 0.975,
+        "correctness": 0.8718,
+        "correctness_ci95": [
+          0.7329,
+          0.944
+        ],
+        "success_rate": 0.85,
+        "insecure_accepted": 0,
+        "calls_mean": 3.85,
+        "calls_p90": 5,
+        "executor_runs_mean": 1.4,
+        "tokens_mean": 2135,
+        "repairs_mean": 0.25,
+        "rounds_mean": 1.4,
+        "budget_exhausted": 0,
+        "review_cycles": 48,
+        "decision_accuracy": 0.8125,
+        "split_cycles": 0,
+        "split_decision_accuracy": 0.0,
+        "votes_changed_in_debate": 0,
+        "insecure_reviews": 0,
+        "insecure_approved": 0
+      }
+    },
+    "grid/r1/a0.9": {
+      "group": "grid",
+      "label": "1 reviewer @ 0.9",
+      "metrics": {
+        "episodes": 40,
+        "accept_rate": 1.0,
+        "correctness": 0.975,
+        "correctness_ci95": [
+          0.8712,
+          0.9956
+        ],
+        "success_rate": 0.975,
+        "insecure_accepted": 0,
+        "calls_mean": 3.975,
+        "calls_p90": 5,
+        "executor_runs_mean": 1.45,
+        "tokens_mean": 2209,
+        "repairs_mean": 0.25,
+        "rounds_mean": 1.45,
+        "budget_exhausted": 0,
+        "review_cycles": 51,
+        "decision_accuracy": 0.9412,
+        "split_cycles": 0,
+        "split_decision_accuracy": 0.0,
+        "votes_changed_in_debate": 0,
+        "insecure_reviews": 0,
+        "insecure_approved": 0
+      }
+    },
+    "grid/r3/a0.6": {
+      "group": "grid",
+      "label": "3 reviewers @ 0.6",
+      "metrics": {
+        "episodes": 40,
+        "accept_rate": 0.925,
+        "correctness": 0.973,
+        "correctness_ci95": [
+          0.8618,
+          0.9952
+        ],
+        "success_rate": 0.9,
+        "insecure_accepted": 0,
+        "calls_mean": 11.125,
+        "calls_p90": 16,
+        "executor_runs_mean": 2.2,
+        "tokens_mean": 6651,
+        "repairs_mean": 0.475,
+        "rounds_mean": 1.7,
+        "budget_exhausted": 0,
+        "review_cycles": 60,
+        "decision_accuracy": 0.75,
+        "split_cycles": 46,
+        "split_decision_accuracy": 0.7174,
+        "votes_changed_in_debate": 37,
+        "insecure_reviews": 0,
+        "insecure_approved": 0
+      }
+    },
+    "grid/r3/a0.7": {
+      "group": "grid",
+      "label": "3 reviewers @ 0.7",
+      "metrics": {
+        "episodes": 40,
+        "accept_rate": 0.975,
+        "correctness": 1.0,
+        "correctness_ci95": [
+          0.9103,
+          1.0
+        ],
+        "success_rate": 0.975,
+        "insecure_accepted": 0,
+        "calls_mean": 10.175,
+        "calls_p90": 16,
+        "executor_runs_mean": 2.05,
+        "tokens_mean": 6014,
+        "repairs_mean": 0.4,
+        "rounds_mean": 1.575,
+        "budget_exhausted": 0,
+        "review_cycles": 56,
+        "decision_accuracy": 0.8571,
+        "split_cycles": 40,
+        "split_decision_accuracy": 0.8,
+        "votes_changed_in_debate": 33,
+        "insecure_reviews": 0,
+        "insecure_approved": 0
+      }
+    },
+    "grid/r3/a0.8": {
+      "group": "grid",
+      "label": "3 reviewers @ 0.8",
+      "metrics": {
+        "episodes": 40,
+        "accept_rate": 1.0,
+        "correctness": 1.0,
+        "correctness_ci95": [
+          0.9124,
+          1.0
+        ],
+        "success_rate": 1.0,
+        "insecure_accepted": 0,
+        "calls_mean": 8.75,
+        "calls_p90": 15,
+        "executor_runs_mean": 1.75,
+        "tokens_mean": 5050,
+        "repairs_mean": 0.4,
+        "rounds_mean": 1.425,
+        "budget_exhausted": 0,
+        "review_cycles": 50,
+        "decision_accuracy": 0.98,
+        "split_cycles": 29,
+        "split_decision_accuracy": 0.9655,
+        "votes_changed_in_debate": 25,
+        "insecure_reviews": 0,
+        "insecure_approved": 0
+      }
+    },
+    "grid/r3/a0.9": {
+      "group": "grid",
+      "label": "3 reviewers @ 0.9",
+      "metrics": {
+        "episodes": 40,
+        "accept_rate": 1.0,
+        "correctness": 1.0,
+        "correctness_ci95": [
+          0.9124,
+          1.0
+        ],
+        "success_rate": 1.0,
+        "insecure_accepted": 0,
+        "calls_mean": 7.875,
+        "calls_p90": 12,
+        "executor_runs_mean": 1.625,
+        "tokens_mean": 4455,
+        "repairs_mean": 0.375,
+        "rounds_mean": 1.4,
+        "budget_exhausted": 0,
+        "review_cycles": 49,
+        "decision_accuracy": 1.0,
+        "split_cycles": 19,
+        "split_decision_accuracy": 1.0,
+        "votes_changed_in_debate": 14,
+        "insecure_reviews": 0,
+        "insecure_approved": 0
+      }
+    },
+    "grid/r5/a0.6": {
+      "group": "grid",
+      "label": "5 reviewers @ 0.6",
+      "metrics": {
+        "episodes": 40,
+        "accept_rate": 0.9,
+        "correctness": 0.9722,
+        "correctness_ci95": [
+          0.8583,
+          0.9951
+        ],
+        "success_rate": 0.875,
+        "insecure_accepted": 0,
+        "calls_mean": 15.725,
+        "calls_p90": 26,
+        "executor_runs_mean": 2.425,
+        "tokens_mean": 10063,
+        "repairs_mean": 0.6,
+        "rounds_mean": 1.75,
+        "budget_exhausted": 0,
+        "review_cycles": 62,
+        "decision_accuracy": 0.7419,
+        "split_cycles": 37,
+        "split_decision_accuracy": 0.6486,
+        "votes_changed_in_debate": 52,
+        "insecure_reviews": 0,
+        "insecure_approved": 0
+      }
+    },
+    "grid/r5/a0.7": {
+      "group": "grid",
+      "label": "5 reviewers @ 0.7",
+      "metrics": {
+        "episodes": 40,
+        "accept_rate": 0.925,
+        "correctness": 1.0,
+        "correctness_ci95": [
+          0.9059,
+          1.0
+        ],
+        "success_rate": 0.925,
+        "insecure_accepted": 0,
+        "calls_mean": 13.775,
+        "calls_p90": 25,
+        "executor_runs_mean": 2.125,
+        "tokens_mean": 8610,
+        "repairs_mean": 0.55,
+        "rounds_mean": 1.6,
+        "budget_exhausted": 0,
+        "review_cycles": 57,
+        "decision_accuracy": 0.8421,
+        "split_cycles": 28,
+        "split_decision_accuracy": 0.7143,
+        "votes_changed_in_debate": 33,
+        "insecure_reviews": 0,
+        "insecure_approved": 0
+      }
+    },
+    "grid/r5/a0.8": {
+      "group": "grid",
+      "label": "5 reviewers @ 0.8",
+      "metrics": {
+        "episodes": 40,
+        "accept_rate": 0.975,
+        "correctness": 1.0,
+        "correctness_ci95": [
+          0.9103,
+          1.0
+        ],
+        "success_rate": 0.975,
+        "insecure_accepted": 0,
+        "calls_mean": 10.425,
+        "calls_p90": 18,
+        "executor_runs_mean": 1.7,
+        "tokens_mean": 5857,
+        "repairs_mean": 0.35,
+        "rounds_mean": 1.45,
+        "budget_exhausted": 0,
+        "review_cycles": 51,
+        "decision_accuracy": 0.9412,
+        "split_cycles": 10,
+        "split_decision_accuracy": 0.7,
+        "votes_changed_in_debate": 12,
+        "insecure_reviews": 0,
+        "insecure_approved": 0
+      }
+    },
+    "grid/r5/a0.9": {
+      "group": "grid",
+      "label": "5 reviewers @ 0.9",
+      "metrics": {
+        "episodes": 40,
+        "accept_rate": 1.0,
+        "correctness": 1.0,
+        "correctness_ci95": [
+          0.9124,
+          1.0
+        ],
+        "success_rate": 1.0,
+        "insecure_accepted": 0,
+        "calls_mean": 9.125,
+        "calls_p90": 14,
+        "executor_runs_mean": 1.475,
+        "tokens_mean": 4798,
+        "repairs_mean": 0.35,
+        "rounds_mean": 1.4,
+        "budget_exhausted": 0,
+        "review_cycles": 49,
+        "decision_accuracy": 1.0,
+        "split_cycles": 2,
+        "split_decision_accuracy": 1.0,
+        "votes_changed_in_debate": 2,
+        "insecure_reviews": 0,
+        "insecure_approved": 0
+      }
+    },
+    "debate-off/r3/a0.7": {
+      "group": "debate",
+      "label": "3 @ 0.7, no debate",
+      "metrics": {
+        "episodes": 40,
+        "accept_rate": 0.925,
+        "correctness": 0.8919,
+        "correctness_ci95": [
+          0.7529,
+          0.9571
+        ],
+        "success_rate": 0.825,
+        "insecure_accepted": 0,
+        "calls_mean": 6.9,
+        "calls_p90": 11,
+        "executor_runs_mean": 1.575,
+        "tokens_mean": 3606,
+        "repairs_mean": 0.275,
+        "rounds_mean": 1.575,
+        "budget_exhausted": 0,
+        "review_cycles": 54,
+        "decision_accuracy": 0.7222,
+        "split_cycles": 39,
+        "split_decision_accuracy": 0.6154,
+        "votes_changed_in_debate": 0,
+        "insecure_reviews": 0,
+        "insecure_approved": 0
+      }
+    },
+    "debate-off/r5/a0.7": {
+      "group": "debate",
+      "label": "5 @ 0.7, no debate",
+      "metrics": {
+        "episodes": 40,
+        "accept_rate": 0.975,
+        "correctness": 0.9231,
+        "correctness_ci95": [
+          0.7968,
+          0.9735
+        ],
+        "success_rate": 0.9,
+        "insecure_accepted": 0,
+        "calls_mean": 8.55,
+        "calls_p90": 13,
+        "executor_runs_mean": 1.35,
+        "tokens_mean": 4348,
+        "repairs_mean": 0.325,
+        "rounds_mean": 1.35,
+        "budget_exhausted": 0,
+        "review_cycles": 47,
+        "decision_accuracy": 0.8936,
+        "split_cycles": 22,
+        "split_decision_accuracy": 0.7727,
+        "votes_changed_in_debate": 0,
+        "insecure_reviews": 0,
+        "insecure_approved": 0
+      }
+    },
+    "topology/single": {
+      "group": "topology",
+      "label": "single coder",
+      "metrics": {
+        "episodes": 40,
+        "accept_rate": 1.0,
+        "correctness": 0.65,
+        "correctness_ci95": [
+          0.4951,
+          0.7787
+        ],
+        "success_rate": 0.65,
+        "insecure_accepted": 1,
+        "calls_mean": 2.2,
+        "calls_p90": 3,
+        "executor_runs_mean": 0.0,
+        "tokens_mean": 1211,
+        "repairs_mean": 0.2,
+        "rounds_mean": 1.0,
+        "budget_exhausted": 0,
+        "review_cycles": 0,
+        "decision_accuracy": 0.0,
+        "split_cycles": 0,
+        "split_decision_accuracy": 0.0,
+        "votes_changed_in_debate": 0,
+        "insecure_reviews": 0,
+        "insecure_approved": 0
+      }
+    },
+    "topology/coder-executor": {
+      "group": "topology",
+      "label": "coder + executor",
+      "metrics": {
+        "episodes": 40,
+        "accept_rate": 1.0,
+        "correctness": 0.775,
+        "correctness_ci95": [
+          0.625,
+          0.8768
+        ],
+        "success_rate": 0.775,
+        "insecure_accepted": 0,
+        "calls_mean": 2.375,
+        "calls_p90": 3,
+        "executor_runs_mean": 1.15,
+        "tokens_mean": 1385,
+        "repairs_mean": 0.225,
+        "rounds_mean": 1.15,
+        "budget_exhausted": 0,
+        "review_cycles": 0,
+        "decision_accuracy": 0.0,
+        "split_cycles": 0,
+        "split_decision_accuracy": 0.0,
+        "votes_changed_in_debate": 0,
+        "insecure_reviews": 0,
+        "insecure_approved": 0
+      }
+    },
+    "rules/majority": {
+      "group": "rules",
+      "label": "majority",
+      "metrics": {
+        "episodes": 40,
+        "accept_rate": 0.925,
+        "correctness": 1.0,
+        "correctness_ci95": [
+          0.9059,
+          1.0
+        ],
+        "success_rate": 0.925,
+        "insecure_accepted": 0,
+        "calls_mean": 10.15,
+        "calls_p90": 16,
+        "executor_runs_mean": 2.025,
+        "tokens_mean": 6033,
+        "repairs_mean": 0.45,
+        "rounds_mean": 1.575,
+        "budget_exhausted": 0,
+        "review_cycles": 55,
+        "decision_accuracy": 0.8364,
+        "split_cycles": 40,
+        "split_decision_accuracy": 0.775,
+        "votes_changed_in_debate": 33,
+        "insecure_reviews": 0,
+        "insecure_approved": 0
+      }
+    },
+    "rules/weighted": {
+      "group": "rules",
+      "label": "reliability-weighted",
+      "metrics": {
+        "episodes": 40,
+        "accept_rate": 1.0,
+        "correctness": 0.975,
+        "correctness_ci95": [
+          0.8712,
+          0.9956
+        ],
+        "success_rate": 0.975,
+        "insecure_accepted": 0,
+        "calls_mean": 7.375,
+        "calls_p90": 11,
+        "executor_runs_mean": 1.6,
+        "tokens_mean": 4022,
+        "repairs_mean": 0.325,
+        "rounds_mean": 1.475,
+        "budget_exhausted": 0,
+        "review_cycles": 52,
+        "decision_accuracy": 0.9231,
+        "split_cycles": 9,
+        "split_decision_accuracy": 0.7778,
+        "votes_changed_in_debate": 7,
+        "insecure_reviews": 0,
+        "insecure_approved": 0
+      }
+    },
+    "rules/quorum-unanimous": {
+      "group": "rules",
+      "label": "quorum 3 of 3",
+      "metrics": {
+        "episodes": 40,
+        "accept_rate": 0.8,
+        "correctness": 1.0,
+        "correctness_ci95": [
+          0.8928,
+          1.0
+        ],
+        "success_rate": 0.8,
+        "insecure_accepted": 0,
+        "calls_mean": 12.025,
+        "calls_p90": 22,
+        "executor_runs_mean": 2.425,
+        "tokens_mean": 7172,
+        "repairs_mean": 0.575,
+        "rounds_mean": 1.9,
+        "budget_exhausted": 0,
+        "review_cycles": 66,
+        "decision_accuracy": 0.6667,
+        "split_cycles": 48,
+        "split_decision_accuracy": 0.5417,
+        "votes_changed_in_debate": 36,
+        "insecure_reviews": 0,
+        "insecure_approved": 0
+      }
+    },
+    "veto-on/r3/a0.6": {
+      "group": "veto",
+      "label": "security tasks, 3 @ 0.6, veto",
+      "metrics": {
+        "episodes": 24,
+        "accept_rate": 0.9583,
+        "correctness": 0.9565,
+        "correctness_ci95": [
+          0.7901,
+          0.9923
+        ],
+        "success_rate": 0.9167,
+        "insecure_accepted": 0,
+        "calls_mean": 10.4167,
+        "calls_p90": 14,
+        "executor_runs_mean": 2.2083,
+        "tokens_mean": 8136,
+        "repairs_mean": 0.4583,
+        "rounds_mean": 1.8333,
+        "budget_exhausted": 0,
+        "review_cycles": 37,
+        "decision_accuracy": 0.7297,
+        "split_cycles": 20,
+        "split_decision_accuracy": 0.7,
+        "votes_changed_in_debate": 11,
+        "insecure_reviews": 4,
+        "insecure_approved": 0
+      }
+    },
+    "veto-off/r3/a0.6": {
+      "group": "veto",
+      "label": "security tasks, 3 @ 0.6, no veto",
+      "metrics": {
+        "episodes": 24,
+        "accept_rate": 0.9583,
+        "correctness": 0.9565,
+        "correctness_ci95": [
+          0.7901,
+          0.9923
+        ],
+        "success_rate": 0.9167,
+        "insecure_accepted": 0,
+        "calls_mean": 10.9167,
+        "calls_p90": 16,
+        "executor_runs_mean": 2.2917,
+        "tokens_mean": 8601,
+        "repairs_mean": 0.4583,
+        "rounds_mean": 1.8333,
+        "budget_exhausted": 0,
+        "review_cycles": 37,
+        "decision_accuracy": 0.7297,
+        "split_cycles": 24,
+        "split_decision_accuracy": 0.75,
+        "votes_changed_in_debate": 14,
+        "insecure_reviews": 4,
+        "insecure_approved": 0
+      }
+    },
+    "corr-0.5/r3/a0.7": {
+      "group": "correlation",
+      "label": "3 @ 0.7, correlation 0.5",
+      "metrics": {
+        "episodes": 40,
+        "accept_rate": 0.85,
+        "correctness": 0.9412,
+        "correctness_ci95": [
+          0.8091,
+          0.9837
+        ],
+        "success_rate": 0.8,
+        "insecure_accepted": 0,
+        "calls_mean": 9.475,
+        "calls_p90": 16,
+        "executor_runs_mean": 2.0,
+        "tokens_mean": 5547,
+        "repairs_mean": 0.35,
+        "rounds_mean": 1.6,
+        "budget_exhausted": 0,
+        "review_cycles": 55,
+        "decision_accuracy": 0.7273,
+        "split_cycles": 32,
+        "split_decision_accuracy": 0.6562,
+        "votes_changed_in_debate": 28,
+        "insecure_reviews": 0,
+        "insecure_approved": 0
+      }
+    },
+    "corr-0.9/r3/a0.7": {
+      "group": "correlation",
+      "label": "3 @ 0.7, correlation 0.9",
+      "metrics": {
+        "episodes": 40,
+        "accept_rate": 0.9,
+        "correctness": 0.9167,
+        "correctness_ci95": [
+          0.7817,
+          0.9713
+        ],
+        "success_rate": 0.825,
+        "insecure_accepted": 0,
+        "calls_mean": 8.125,
+        "calls_p90": 14,
+        "executor_runs_mean": 1.775,
+        "tokens_mean": 4557,
+        "repairs_mean": 0.35,
+        "rounds_mean": 1.6,
+        "budget_exhausted": 0,
+        "review_cycles": 55,
+        "decision_accuracy": 0.7273,
+        "split_cycles": 14,
+        "split_decision_accuracy": 0.7857,
+        "votes_changed_in_debate": 12,
+        "insecure_reviews": 0,
+        "insecure_approved": 0
+      }
+    }
+  },
+  "debate_paired": {
+    "r3/a0.7": {
+      "split_first_cycles": 28,
+      "accuracy_without_debate": 0.6071,
+      "accuracy_with_debate": 0.8214,
+      "fixed_by_debate": 8,
+      "broken_by_debate": 2
+    },
+    "r5/a0.7": {
+      "split_first_cycles": 19,
+      "accuracy_without_debate": 0.7895,
+      "accuracy_with_debate": 0.7368,
+      "fixed_by_debate": 3,
+      "broken_by_debate": 4
+    }
+  }
+}

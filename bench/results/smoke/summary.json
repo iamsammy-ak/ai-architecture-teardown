@@ -1,0 +1,459 @@
+{
+  "command": "python -m teardown bench",
+  "runs": [
+    {
+      "repo": "context-assembler-engine",
+      "commit": "1f7863ceab66f865fa5e69ff1d0806df8ed260fb",
+      "mode": "fast",
+      "status": "passed",
+      "reason": "",
+      "started": "2026-11-20T20:17:24+00:00",
+      "seconds": 9.4,
+      "python": "Python 3.13.2",
+      "comparable": false,
+      "steps": [
+        {
+          "phase": "clone",
+          "command": "git clone <mirror>/context-assembler-engine",
+          "returncode": 0,
+          "seconds": 0.8
+        },
+        {
+          "phase": "benchmark",
+          "command": "python benchmarks/run_benchmark.py --seeds 5 --budgets 1024,3072",
+          "returncode": 0,
+          "seconds": 7.9
+        }
+      ],
+      "files": [
+        {
+          "path": "benchmarks/results/benchmark.json",
+          "exists": true,
+          "bytes": 5415,
+          "sha256": "ef8805f59695633aed378b9d0bceba109b54d834910ab6c5966bde4dd835a7b0",
+          "changed": true
+        },
+        {
+          "path": "benchmarks/results/benchmark.md",
+          "exists": true,
+          "bytes": 3437,
+          "sha256": "3f2902b971e935d525f219c79e757e920512e219fb4ac36239808c044c1a804d",
+          "changed": true
+        }
+      ],
+      "headline": [
+        {
+          "label": "fact retention, engine (%)",
+          "file": "benchmarks/results/benchmark.json",
+          "pointer": "/overall/engine/fact_retention_pct",
+          "fresh": 90.0,
+          "committed": 88.6
+        },
+        {
+          "label": "budget violations, engine",
+          "file": "benchmarks/results/benchmark.json",
+          "pointer": "/overall/engine/violations",
+          "fresh": 0.0,
+          "committed": 0.0
+        },
+        {
+          "label": "fact retention, fixed split (%)",
+          "file": "benchmarks/results/benchmark.json",
+          "pointer": "/overall/proportional/fact_retention_pct",
+          "fresh": 56.7,
+          "committed": 66.2
+        }
+      ],
+      "log_tail": []
+    },
+    {
+      "repo": "inter-agent-security-proxy",
+      "commit": "d2ad5b5b66bc524c70a2d14d5d7b3097109062fa",
+      "mode": "fast",
+      "status": "passed",
+      "reason": "",
+      "started": "2026-11-20T20:20:35+00:00",
+      "seconds": 19.3,
+      "python": "Python 3.13.2",
+      "comparable": true,
+      "steps": [
+        {
+          "phase": "clone",
+          "command": "git clone <mirror>/inter-agent-security-proxy",
+          "returncode": 0,
+          "seconds": 0.6
+        },
+        {
+          "phase": "benchmark",
+          "command": "python benchmarks/run_benchmarks.py --suite pii",
+          "returncode": 0,
+          "seconds": 18.2
+        }
+      ],
+      "files": [
+        {
+          "path": "benchmarks/results/pii.json",
+          "exists": true,
+          "bytes": 3918,
+          "sha256": "8221c42c03b6cde143508324d63e98d6b225f7d42f7e6aff5bef33312d7418b1",
+          "changed": true
+        },
+        {
+          "path": "benchmarks/results/pii.md",
+          "exists": true,
+          "bytes": 1603,
+          "sha256": "c65e7c3c7e19041d3e5e526cb51a967d495c8dfef55c937e9067c0192d89fdb6",
+          "changed": true
+        }
+      ],
+      "headline": [
+        {
+          "label": "PII F1, regex + validators",
+          "file": "benchmarks/results/pii.json",
+          "pointer": "/results/regex + validators/overall/f1",
+          "fresh": 0.9691,
+          "committed": 0.9691
+        },
+        {
+          "label": "PII precision, regex + validators",
+          "file": "benchmarks/results/pii.json",
+          "pointer": "/results/regex + validators/overall/precision",
+          "fresh": 1.0,
+          "committed": 1.0
+        }
+      ],
+      "log_tail": []
+    },
+    {
+      "repo": "raw-mcp-tool-server",
+      "commit": "1cfc10ed5a7f643fada223d85b4e6b3bbf660dab",
+      "mode": "fast",
+      "status": "passed",
+      "reason": "",
+      "started": "2026-11-20T20:18:02+00:00",
+      "seconds": 12.7,
+      "python": "Python 3.13.2",
+      "comparable": false,
+      "steps": [
+        {
+          "phase": "clone",
+          "command": "git clone <mirror>/raw-mcp-tool-server",
+          "returncode": 0,
+          "seconds": 0.9
+        },
+        {
+          "phase": "benchmark",
+          "command": "python benchmarks/fuzz_campaign.py --cases 1000 --seed 7",
+          "returncode": 0,
+          "seconds": 3.6
+        },
+        {
+          "phase": "benchmark",
+          "command": "python benchmarks/permission_matrix.py",
+          "returncode": 0,
+          "seconds": 7.3
+        }
+      ],
+      "files": [
+        {
+          "path": "benchmarks/results/fuzz_campaign.json",
+          "exists": true,
+          "bytes": 618,
+          "sha256": "216b7bc58f61e4b59c30471b465a46b910570ca409af653b2b61219bdcc96fc9",
+          "changed": true
+        },
+        {
+          "path": "benchmarks/results/fuzz_campaign.md",
+          "exists": true,
+          "bytes": 630,
+          "sha256": "b83bf057ed75d18d986abfcfffe7c86788aebbe89623f330288722d8b8f28561",
+          "changed": true
+        },
+        {
+          "path": "benchmarks/results/permission_matrix.json",
+          "exists": true,
+          "bytes": 6636,
+          "sha256": "f10c337849e5c5735c2ea9a00571e2f8f8d6bfd3f359f6aac5c098bdac35ee94",
+          "changed": true
+        },
+        {
+          "path": "benchmarks/results/permission_matrix.md",
+          "exists": true,
+          "bytes": 3514,
+          "sha256": "e9d76d99336c74f4fcb141d9ef7c2fbbd40fd11aa661ff8687b9a22f3ac1f8e5",
+          "changed": true
+        }
+      ],
+      "headline": [
+        {
+          "label": "server crashes under fuzzing",
+          "file": "benchmarks/results/fuzz_campaign.json",
+          "pointer": "/server_crashes",
+          "fresh": 0.0,
+          "committed": 0.0
+        },
+        {
+          "label": "internal errors under fuzzing",
+          "file": "benchmarks/results/fuzz_campaign.json",
+          "pointer": "/internal_errors",
+          "fresh": 0.0,
+          "committed": 0.0
+        },
+        {
+          "label": "non-JSON-RPC stdout lines",
+          "file": "benchmarks/results/fuzz_campaign.json",
+          "pointer": "/invalid_stdout_lines",
+          "fresh": 0.0,
+          "committed": 0.0
+        }
+      ],
+      "log_tail": []
+    },
+    {
+      "repo": "self-correcting-agentic-rag",
+      "commit": "e84144b098876e7718e2e5e5c1043c02fe045298",
+      "mode": "fast",
+      "status": "passed",
+      "reason": "",
+      "started": "2026-11-20T20:20:13+00:00",
+      "seconds": 21.2,
+      "python": "Python 3.13.2",
+      "comparable": true,
+      "steps": [
+        {
+          "phase": "clone",
+          "command": "git clone <mirror>/self-correcting-agentic-rag",
+          "returncode": 0,
+          "seconds": 0.8
+        },
+        {
+          "phase": "benchmark",
+          "command": "python benchmarks/run_benchmark.py --backend hashing",
+          "returncode": 0,
+          "seconds": 19.9
+        }
+      ],
+      "files": [
+        {
+          "path": "benchmarks/results/benchmark-hashing.json",
+          "exists": true,
+          "bytes": 154762,
+          "sha256": "75c691b3c7ce9b0632e0eb3e05a881de5270e731bc2a5c04e029325ef3f5526c",
+          "changed": true
+        },
+        {
+          "path": "benchmarks/results/benchmark-hashing.md",
+          "exists": true,
+          "bytes": 2924,
+          "sha256": "6bd2d888d7c2a75e606f9cc946de3d5ec10509d75373036928850624b8299715",
+          "changed": true
+        }
+      ],
+      "headline": [
+        {
+          "label": "wrong answers, agentic (share)",
+          "file": "benchmarks/results/benchmark-hashing.json",
+          "pointer": "/test/agentic/wrong_answer_rate",
+          "fresh": 0.0,
+          "committed": 0.0
+        },
+        {
+          "label": "wrong answers, naive (share)",
+          "file": "benchmarks/results/benchmark-hashing.json",
+          "pointer": "/test/naive/wrong_answer_rate",
+          "fresh": 0.2898550724637681,
+          "committed": 0.2898550724637681
+        }
+      ],
+      "log_tail": []
+    },
+    {
+      "repo": "semantic-cache-gateway",
+      "commit": "b8b77e02b5ed88b329e3af6652060544bd4aeb57",
+      "mode": "fast",
+      "status": "passed",
+      "reason": "",
+      "started": "2026-11-20T20:19:28+00:00",
+      "seconds": 18.6,
+      "python": "Python 3.13.2",
+      "comparable": false,
+      "steps": [
+        {
+          "phase": "clone",
+          "command": "git clone <mirror>/semantic-cache-gateway",
+          "returncode": 0,
+          "seconds": 0.8
+        },
+        {
+          "phase": "benchmark",
+          "command": "python -m cache_gateway bench --suite ablation --embedder hashing --requests 600",
+          "returncode": 0,
+          "seconds": 17.3
+        }
+      ],
+      "files": [
+        {
+          "path": "benchmarks/results/ablation.json",
+          "exists": true,
+          "bytes": 18794,
+          "sha256": "71b74b92f06cad1b897cc3f53f62decac91d7e178ebe91769b088c39e08dc8ed",
+          "changed": true
+        },
+        {
+          "path": "benchmarks/results/ablation.md",
+          "exists": true,
+          "bytes": 3369,
+          "sha256": "21bee6e62e0417c981fc3baf5de4f3fdd57a96d5f0184543edec00346e9d833a",
+          "changed": true
+        }
+      ],
+      "headline": [
+        {
+          "label": "saving, cache + logistic routing, support (%)",
+          "file": "benchmarks/results/ablation.json",
+          "pointer": "/workloads/support/rows/6/savings_pct",
+          "fresh": 70.1389403989759,
+          "committed": 73.21598044194226
+        },
+        {
+          "label": "hit rate, exact + semantic, support",
+          "file": "benchmarks/results/ablation.json",
+          "pointer": "/workloads/support/rows/2/cache_hit_rate",
+          "fresh": 0.19333333333333333,
+          "committed": 0.4716666666666667
+        }
+      ],
+      "log_tail": []
+    },
+    {
+      "repo": "three-tier-agent-memory",
+      "commit": "cf1aea0cbaf79a991cd3bd69612a435518dd6441",
+      "mode": "fast",
+      "status": "passed",
+      "reason": "",
+      "started": "2026-11-20T20:18:15+00:00",
+      "seconds": 15.5,
+      "python": "Python 3.13.2",
+      "comparable": false,
+      "steps": [
+        {
+          "phase": "clone",
+          "command": "git clone <mirror>/three-tier-agent-memory",
+          "returncode": 0,
+          "seconds": 0.7
+        },
+        {
+          "phase": "benchmark",
+          "command": "python -m tiered_memory bench --users 10 --sessions 5 --seed 7 --embedder hashing --k 5 --budget 200 --growth-users 2 --growth-sessions 10",
+          "returncode": 0,
+          "seconds": 14.1
+        }
+      ],
+      "files": [
+        {
+          "path": "benchmarks/results/benchmark.json",
+          "exists": true,
+          "bytes": 9112,
+          "sha256": "35ae626170225bb1b9a6e5d4e9e835b13cd589981ebe83efa250b2fce670430a",
+          "changed": true
+        },
+        {
+          "path": "benchmarks/results/benchmark.md",
+          "exists": true,
+          "bytes": 3227,
+          "sha256": "b2df6bb9037b793cb69ee886db6df1341750a8cdd62c024805ce31fa0eea2369",
+          "changed": true
+        }
+      ],
+      "headline": [
+        {
+          "label": "recall@5, tiered",
+          "file": "benchmarks/results/benchmark.json",
+          "pointer": "/systems/2/recall_at_k",
+          "fresh": 0.6222,
+          "committed": 0.8044
+        },
+        {
+          "label": "stale@5, tiered",
+          "file": "benchmarks/results/benchmark.json",
+          "pointer": "/systems/2/stale_at_k",
+          "fresh": 0.1852,
+          "committed": 0.2241
+        },
+        {
+          "label": "stale@5, flat vector store",
+          "file": "benchmarks/results/benchmark.json",
+          "pointer": "/systems/1/stale_at_k",
+          "fresh": 0.8148,
+          "committed": 0.7759
+        }
+      ],
+      "log_tail": []
+    },
+    {
+      "repo": "typed-multi-agent-swarm",
+      "commit": "37b44ec34961f5d3879863a284f203e79d06c1c3",
+      "mode": "fast",
+      "status": "passed",
+      "reason": "",
+      "started": "2026-11-20T20:18:31+00:00",
+      "seconds": 34.2,
+      "python": "Python 3.13.2",
+      "comparable": false,
+      "steps": [
+        {
+          "phase": "clone",
+          "command": "git clone <mirror>/typed-multi-agent-swarm",
+          "returncode": 0,
+          "seconds": 1.0
+        },
+        {
+          "phase": "benchmark",
+          "command": "python benchmarks/run_benchmarks.py --seeds 2 --calibration-seeds 2 --workers 2",
+          "returncode": 0,
+          "seconds": 32.5
+        }
+      ],
+      "files": [
+        {
+          "path": "benchmarks/results/swarm_benchmark.json",
+          "exists": true,
+          "bytes": 20477,
+          "sha256": "127f5cb330f9d21c62e08e4ba65ddd071806dd5dc0f8992fa9d1c64a6d32e8a0",
+          "changed": true
+        },
+        {
+          "path": "benchmarks/results/swarm_benchmark.md",
+          "exists": true,
+          "bytes": 4873,
+          "sha256": "3f0b5a04a19c937713058bc98f7e1d1420ea77e4d160cf61592a017bf54d7683",
+          "changed": true
+        }
+      ],
+      "headline": [
+        {
+          "label": "accepted-solution correctness, 3 reviewers @ 0.8",
+          "file": "benchmarks/results/swarm_benchmark.json",
+          "pointer": "/experiments/grid~1r3~1a0.8/metrics/correctness",
+          "fresh": 1.0,
+          "committed": 0.9792
+        },
+        {
+          "label": "agent calls per task, 3 reviewers @ 0.8",
+          "file": "benchmarks/results/swarm_benchmark.json",
+          "pointer": "/experiments/grid~1r3~1a0.8/metrics/calls_mean",
+          "fresh": 8.75,
+          "committed": 9.0967
+        },
+        {
+          "label": "correctness, single coder",
+          "file": "benchmarks/results/swarm_benchmark.json",
+          "pointer": "/experiments/topology~1single/metrics/correctness",
+          "fresh": 0.65,
+          "committed": 0.62
+        }
+      ],
+      "log_tail": []
+    }
+  ]
+}

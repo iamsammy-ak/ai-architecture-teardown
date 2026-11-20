@@ -1,0 +1,52 @@
+name: Reproduce benchmarks
+
+# Manual only: clones each pinned repository, installs it into a fresh virtual environment and re-runs its
+# benchmark. Never triggered by a push, so it cannot block a change.
+on:
+  workflow_dispatch:
+    inputs:
+      only:
+        description: "Comma-separated repositories (empty = every model-free benchmark)"
+        required: false
+        default: ""
+      mode:
+        description: "fast (small settings) or full (the settings behind the committed results)"
+        required: true
+        default: fast
+        type: choice
+        options: [fast, full]
+
+permissions:
+  contents: read
+
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install the runner
+        run: pip install -e .
+      - name: Run the model-free benchmarks
+        env:
+          ONLY: ${{ inputs.only }}
+          MODE: ${{ inputs.mode }}
+        run: |
+          args=(--model-free "--${MODE}" --out reproduce-results)
+          if [ -n "${ONLY}" ]; then args+=(--only "${ONLY}"); fi
+          python -m teardown bench "${args[@]}"
+      - name: Job summary
+        if: always()
+        run: |
+          if [ -f reproduce-results/summary.md ]; then cat reproduce-results/summary.md >> "$GITHUB_STEP_SUMMARY"; fi
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reproduce-results
+          path: reproduce-results
+          if-no-files-found: warn

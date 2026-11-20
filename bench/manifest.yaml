@@ -1,0 +1,300 @@
+# Pinned benchmark manifest for the eleven systems in this teardown.
+#
+# `python -m teardown bench` reads this file, clones each repository at `commit` into a temporary directory,
+# installs it into a fresh virtual environment, runs the chosen mode's commands and compares the headline numbers it
+# produces with the ones committed at that commit.
+#
+# Conventions
+#   commands       run from the clone's root; a leading `python`/`pip` uses the fresh venv's interpreter
+#   env            extra environment variables for install and benchmark commands
+#   needs_models   the mode downloads model weights (embeddings, cross-encoders, spaCy pipelines)
+#   needs_data     the mode downloads a public dataset
+#   deterministic  re-running the full mode should give the committed headline numbers exactly
+#                  (timings excepted; they are never used as headline checks)
+#   headline       values read from the fresh result files and from the committed ones at `commit`
+
+version: 1
+owner: iamsammy-ak
+repos:
+  - name: context-assembler-engine
+    title: Context Assembler Engine
+    summary: Fits every prompt to a verified token budget and explains every cut.
+    commit: 1f7863ceab66f865fa5e69ff1d0806df8ed260fb
+    published: true
+    install: ['python -m pip install -e ".[dev]"']
+    env: {PYTHONPATH: src}
+    downloads: [tiktoken o200k_base encoding (about 4 MB, first use)]
+    deterministic: true
+    modes:
+      full:
+        commands: [python benchmarks/run_benchmark.py]
+        runtime_minutes: 5
+      fast:
+        commands: ["python benchmarks/run_benchmark.py --seeds 5 --budgets 1024,3072"]
+        runtime_minutes: 1
+    results: [benchmarks/results/benchmark.json, benchmarks/results/benchmark.md]
+    headline:
+      - {label: "fact retention, engine (%)", file: benchmarks/results/benchmark.json, pointer: /overall/engine/fact_retention_pct}
+      - {label: "budget violations, engine", file: benchmarks/results/benchmark.json, pointer: /overall/engine/violations}
+      - {label: "fact retention, fixed split (%)", file: benchmarks/results/benchmark.json, pointer: /overall/proportional/fact_retention_pct}
+
+  - name: graphrag-knowledge-pipeline
+    title: GraphRAG Knowledge Pipeline
+    summary: Builds a cited knowledge graph from text and answers multi-hop questions by walking it.
+    commit: 21dc6d17dbd5fbc6ef827b8963c6a746f644b96e
+    published: true
+    install: ['python -m pip install -e ".[dev]"', python -m spacy download en_core_web_sm]
+    env: {}
+    downloads: [spaCy en_core_web_sm (about 13 MB)]
+    deterministic: true
+    modes:
+      full:
+        install: ['python -m pip install -e ".[dev,models]"', python -m spacy download en_core_web_sm]
+        commands: [graphrag bench --embedder bge --chart assets/benchmark.png]
+        runtime_minutes: 5
+        needs_models: true
+        results: [benchmarks/results/benchmark-bge-small-en-v1.5.json, benchmarks/results/benchmark-bge-small-en-v1.5.md]
+        headline:
+          - {label: "full support@5, graph (test)", file: benchmarks/results/benchmark-bge-small-en-v1.5.json, pointer: /retrieval/summary/test/graph/full@5}
+          - {label: "full support@5, vector (test)", file: benchmarks/results/benchmark-bge-small-en-v1.5.json, pointer: /retrieval/summary/test/vector/full@5}
+      fast:
+        commands: [graphrag bench --embedder hashing]
+        runtime_minutes: 2
+        needs_models: true
+        matches_committed: true
+        results: [benchmarks/results/benchmark-hashing-512.json, benchmarks/results/benchmark-hashing-512.md]
+        headline:
+          - {label: "full support@5, graph (test)", file: benchmarks/results/benchmark-hashing-512.json, pointer: /retrieval/summary/test/graph/full@5}
+          - {label: "full support@5, vector (test)", file: benchmarks/results/benchmark-hashing-512.json, pointer: /retrieval/summary/test/vector/full@5}
+
+  - name: self-correcting-agentic-rag
+    title: Self-Correcting Agentic RAG
+    summary: Plans retrieval, grades evidence, verifies every claim and abstains when its fitted confidence is low.
+    commit: e84144b098876e7718e2e5e5c1043c02fe045298
+    published: true
+    install: ['python -m pip install -e ".[dev]"']
+    env: {}
+    deterministic: true
+    modes:
+      full:
+        install: ['python -m pip install -e ".[dev,models]"']
+        commands: [python benchmarks/run_benchmark.py]
+        runtime_minutes: 15
+        needs_models: true
+        results: [benchmarks/results/benchmark-models.json, benchmarks/results/benchmark-models.md]
+        headline:
+          - {label: "wrong answers, agentic (share)", file: benchmarks/results/benchmark-models.json, pointer: /test/agentic/wrong_answer_rate}
+          - {label: "wrong answers, naive (share)", file: benchmarks/results/benchmark-models.json, pointer: /test/naive/wrong_answer_rate}
+      fast:
+        commands: [python benchmarks/run_benchmark.py --backend hashing]
+        runtime_minutes: 3
+        matches_committed: true
+        results: [benchmarks/results/benchmark-hashing.json, benchmarks/results/benchmark-hashing.md]
+        headline:
+          - {label: "wrong answers, agentic (share)", file: benchmarks/results/benchmark-hashing.json, pointer: /test/agentic/wrong_answer_rate}
+          - {label: "wrong answers, naive (share)", file: benchmarks/results/benchmark-hashing.json, pointer: /test/naive/wrong_answer_rate}
+
+  - name: durable-agent-state-machine
+    title: Durable Agent State Machine
+    summary: Journal-backed workflow runtime that survives killed workers and publishes side effects once.
+    commit: 5facc0f0b769a2e68a57b8601f0730d9f8d4382f
+    published: true
+    install: ['python -m pip install -e ".[dev]"']
+    env: {PYTHONPATH: src}
+    deterministic: false
+    modes:
+      full:
+        commands:
+          - python benchmarks/chaos_bench.py --runs 200 --crashes 200 --workers 8 --seed 7 --lease-ttl 1
+          - python benchmarks/overhead.py
+        runtime_minutes: 10
+      fast:
+        commands: [python benchmarks/chaos_bench.py --runs 12 --crashes 6 --workers 2 --seed 7 --lease-ttl 1]
+        runtime_minutes: 2
+        results: [benchmarks/results/chaos.json, benchmarks/results/chaos.md]
+    results: [benchmarks/results/chaos.json, benchmarks/results/chaos.md, benchmarks/results/overhead.json, benchmarks/results/overhead.md]
+    headline:
+      - {label: "runs ending as expected (share)", file: benchmarks/results/chaos.json, pointer: /outbox/completion_rate}
+      - {label: "duplicate publications, outbox", file: benchmarks/results/chaos.json, pointer: /outbox/duplicate_publications}
+      - {label: "duplicate publications, direct call", file: benchmarks/results/chaos.json, pointer: /direct/duplicate_publications}
+      - {label: "completed steps executed again", file: benchmarks/results/chaos.json, pointer: /outbox/completed_step_reexecutions}
+
+  - name: raw-mcp-tool-server
+    title: Raw MCP Tool Server
+    summary: Model Context Protocol server from the JSON-RPC layer up, with scoped, sandboxed and audited tools.
+    commit: 1cfc10ed5a7f643fada223d85b4e6b3bbf660dab
+    published: true
+    install: ['python -m pip install -e ".[dev]"']
+    env: {PYTHONPATH: src}
+    deterministic: true
+    modes:
+      full:
+        commands:
+          - python benchmarks/bench_stdio.py
+          - python benchmarks/fuzz_campaign.py --cases 10000 --seed 7
+          - python benchmarks/permission_matrix.py
+        runtime_minutes: 10
+      fast:
+        commands:
+          - python benchmarks/fuzz_campaign.py --cases 1000 --seed 7
+          - python benchmarks/permission_matrix.py
+        runtime_minutes: 2
+        results: [benchmarks/results/fuzz_campaign.json, benchmarks/results/fuzz_campaign.md,
+                  benchmarks/results/permission_matrix.json, benchmarks/results/permission_matrix.md]
+        headline:
+          - {label: "server crashes under fuzzing", file: benchmarks/results/fuzz_campaign.json, pointer: /server_crashes}
+          - {label: "internal errors under fuzzing", file: benchmarks/results/fuzz_campaign.json, pointer: /internal_errors}
+          - {label: "non-JSON-RPC stdout lines", file: benchmarks/results/fuzz_campaign.json, pointer: /invalid_stdout_lines}
+    results: [benchmarks/results/stdio_benchmark.json, benchmarks/results/stdio_benchmark.md,
+              benchmarks/results/fuzz_campaign.json, benchmarks/results/fuzz_campaign.md,
+              benchmarks/results/permission_matrix.json, benchmarks/results/permission_matrix.md]
+    headline:
+      - {label: "server crashes under fuzzing", file: benchmarks/results/fuzz_campaign.json, pointer: /server_crashes}
+      - {label: "internal errors under fuzzing", file: benchmarks/results/fuzz_campaign.json, pointer: /internal_errors}
+      - {label: "non-JSON-RPC stdout lines", file: benchmarks/results/fuzz_campaign.json, pointer: /invalid_stdout_lines}
+
+  - name: three-tier-agent-memory
+    title: Three-Tier Agent Memory
+    summary: Working, episodic and semantic memory with versioned facts that know when they stopped being true.
+    commit: cf1aea0cbaf79a991cd3bd69612a435518dd6441
+    published: true
+    install: ['python -m pip install -e ".[dev]"']
+    env: {PYTHONPATH: src}
+    deterministic: true
+    modes:
+      full:
+        install: ['python -m pip install -e ".[dev,models]"']
+        commands:
+          - python -m tiered_memory bench --users 50 --sessions 10 --seed 7 --embedder fastembed --k 5 --budget 200 --growth-users 10 --growth-sessions 40
+        runtime_minutes: 10
+        needs_models: true
+      fast:
+        commands:
+          - python -m tiered_memory bench --users 10 --sessions 5 --seed 7 --embedder hashing --k 5 --budget 200 --growth-users 2 --growth-sessions 10
+        runtime_minutes: 2
+    results: [benchmarks/results/benchmark.json, benchmarks/results/benchmark.md]
+    headline:
+      - {label: "recall@5, tiered", file: benchmarks/results/benchmark.json, pointer: /systems/2/recall_at_k}
+      - {label: "stale@5, tiered", file: benchmarks/results/benchmark.json, pointer: /systems/2/stale_at_k}
+      - {label: "stale@5, flat vector store", file: benchmarks/results/benchmark.json, pointer: /systems/1/stale_at_k}
+
+  - name: typed-multi-agent-swarm
+    title: Typed Multi-Agent Swarm
+    summary: Supervisor state machine over typed hand-offs, consensus votes, a security veto and evidence-checked debate.
+    commit: 37b44ec34961f5d3879863a284f203e79d06c1c3
+    published: true
+    install: ['python -m pip install -e ".[dev]"']
+    env: {PYTHONPATH: src}
+    deterministic: true
+    modes:
+      full:
+        commands: [python benchmarks/run_benchmarks.py --seeds 30]
+        runtime_minutes: 5
+      fast:
+        commands: [python benchmarks/run_benchmarks.py --seeds 2 --calibration-seeds 2 --workers 2]
+        runtime_minutes: 3
+    results: [benchmarks/results/swarm_benchmark.json, benchmarks/results/swarm_benchmark.md]
+    headline:
+      - {label: "accepted-solution correctness, 3 reviewers @ 0.8", file: benchmarks/results/swarm_benchmark.json, pointer: /experiments/grid~1r3~1a0.8/metrics/correctness}
+      - {label: "agent calls per task, 3 reviewers @ 0.8", file: benchmarks/results/swarm_benchmark.json, pointer: /experiments/grid~1r3~1a0.8/metrics/calls_mean}
+      - {label: "correctness, single coder", file: benchmarks/results/swarm_benchmark.json, pointer: /experiments/topology~1single/metrics/correctness}
+
+  - name: trajectory-eval-gate
+    title: Trajectory Eval Gate
+    summary: Grades agent runs against golden partial-order DAGs and blocks the pull request that regresses.
+    commit: 3921ccec986ce71b8922398b69a055b9217073cb
+    published: true
+    install: ['python -m pip install -e ".[dev]"']
+    env: {PYTHONPATH: src}
+    deterministic: true
+    modes:
+      full:
+        commands: [python benchmarks/run_benchmarks.py]
+        runtime_minutes: 3
+      fast:
+        commands: [python benchmarks/run_benchmarks.py]
+        runtime_minutes: 3
+    results: [benchmarks/results/benchmark.json, benchmarks/results/benchmark.md]
+    headline:
+      - {label: "regressions blocked, trajectory gate (%)", file: benchmarks/results/benchmark.json, pointer: /summary/regression_detection_pct/trajectory_gate}
+      - {label: "regressions blocked, outcome-only (%)", file: benchmarks/results/benchmark.json, pointer: /summary/regression_detection_pct/outcome_only}
+      - {label: "benign run sets blocked (%)", file: benchmarks/results/benchmark.json, pointer: /summary/benign_false_positive_pct/trajectory_gate}
+
+  - name: inter-agent-security-proxy
+    title: Inter-Agent Security Proxy
+    summary: Tokenises PII, screens for prompt injection, enforces least privilege and hash-chains every decision.
+    commit: d2ad5b5b66bc524c70a2d14d5d7b3097109062fa
+    published: true
+    install: ['python -m pip install -e ".[dev]"']
+    env: {}
+    deterministic: true
+    modes:
+      full:
+        install: ['python -m pip install -e ".[dev,models,nlp]"', python -m spacy download en_core_web_sm]
+        commands: [python benchmarks/download_data.py, python benchmarks/run_benchmarks.py]
+        runtime_minutes: 15
+        needs_models: true
+        needs_data: true
+        results: [benchmarks/results/injection.json, benchmarks/results/injection.md, benchmarks/results/pii.json,
+                  benchmarks/results/pii.md, benchmarks/results/latency.json, benchmarks/results/latency.md]
+        headline:
+          - {label: "injection F1, classifier bge-small (deepset test)", file: benchmarks/results/injection.json, pointer: "/deepset_test/classifier (bge-small)/f1"}
+          - {label: "PII F1, regex + validators", file: benchmarks/results/pii.json, pointer: "/results/regex + validators/overall/f1"}
+      fast:
+        commands: [python benchmarks/run_benchmarks.py --suite pii]
+        runtime_minutes: 1
+        matches_committed: true
+        results: [benchmarks/results/pii.json, benchmarks/results/pii.md]
+        headline:
+          - {label: "PII F1, regex + validators", file: benchmarks/results/pii.json, pointer: "/results/regex + validators/overall/f1"}
+          - {label: "PII precision, regex + validators", file: benchmarks/results/pii.json, pointer: "/results/regex + validators/overall/precision"}
+
+  - name: semantic-cache-gateway
+    title: Semantic Cache Gateway
+    summary: OpenAI-compatible gateway with exact and guarded semantic caching, tiered routing, budgets and fallbacks.
+    commit: b8b77e02b5ed88b329e3af6652060544bd4aeb57
+    published: true
+    install: ['python -m pip install -e ".[dev]"']
+    env: {PYTHONPATH: src}
+    deterministic: true
+    modes:
+      full:
+        install: ['python -m pip install -e ".[dev,models]"']
+        commands: [python -m cache_gateway bench --suite all --embedder fastembed]
+        runtime_minutes: 30
+        needs_models: true
+      fast:
+        commands: [python -m cache_gateway bench --suite ablation --embedder hashing --requests 600]
+        runtime_minutes: 2
+        results: [benchmarks/results/ablation.json, benchmarks/results/ablation.md]
+    results: [benchmarks/results/ablation.json, benchmarks/results/ablation.md, benchmarks/results/sweep_bge-small.json,
+              benchmarks/results/chaos.json, benchmarks/results/router.json, benchmarks/results/overhead.json]
+    headline:
+      - {label: "saving, cache + logistic routing, support (%)", file: benchmarks/results/ablation.json, pointer: /workloads/support/rows/6/savings_pct}
+      - {label: "hit rate, exact + semantic, support", file: benchmarks/results/ablation.json, pointer: /workloads/support/rows/2/cache_hit_rate}
+
+  - name: hybrid-rerank-retrieval
+    title: Hybrid Rerank Retrieval
+    summary: From-scratch BM25 and dense retrieval, rank fusion, cross-encoder reranking and typed filters on BEIR.
+    commit: b43a6ecbd07c50621b42f650c3606348cf2c3d93
+    published: true
+    install: ['python -m pip install -e ".[dev]"']
+    env: {}
+    deterministic: true
+    modes:
+      full:
+        install: ['python -m pip install -e ".[dev,models]"']
+        commands: [python -m hybrid_retrieval download scifact, python -m hybrid_retrieval bench --dataset scifact]
+        runtime_minutes: 60
+        needs_models: true
+        needs_data: true
+        results: [benchmarks/results/scifact.json, benchmarks/results/scifact.md]
+        headline: []
+      fast:
+        commands: [python -m hybrid_retrieval download scifact, python -m hybrid_retrieval bench --dataset scifact --sparse-only]
+        runtime_minutes: 2
+        needs_data: true
+        results: [benchmarks/results/bm25_scifact.json, benchmarks/results/bm25_scifact.md]
+        headline:
+          - {label: "BM25 nDCG@10 (SciFact)", file: benchmarks/results/bm25_scifact.json, pointer: /methods/0/metrics/ndcg@10}
+          - {label: "BM25 Recall@100 (SciFact)", file: benchmarks/results/bm25_scifact.json, pointer: /methods/0/metrics/recall@100}

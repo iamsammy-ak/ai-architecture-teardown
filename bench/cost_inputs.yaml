@@ -1,0 +1,299 @@
+# Inputs of the cost-per-task model (src/teardown/cost.py).
+#
+# Three kinds of input, kept apart on purpose:
+#   price_tables  USD per million tokens. Three come from the repositories (each with the file that defines it);
+#                 one is a hypothetical scenario defined here and labelled as such.
+#   measurements  numbers read from a results or data file of a repository at its pinned commit
+#                 (bench/manifest.yaml). `python -m teardown verify-sources` re-reads every one of them.
+#   assumptions   numbers no repository measures. Each states why the value was chosen.
+#
+# JSON pointers follow RFC 6901 ("/" inside a key is written "~1").
+
+price_tables:
+  - id: gateway-illustrative
+    label: Gateway illustrative table
+    kind: repo
+    description: >-
+      The dated, illustrative three-tier table of semantic-cache-gateway (first model of each tier). Round numbers in
+      the range public price lists use for small, mid-size and frontier models; not a quote from any provider.
+    source:
+      repo: semantic-cache-gateway
+      path: src/cache_gateway/data/default_config.yaml
+      contains:
+        - "input_per_mtok: 0.10"
+        - "output_per_mtok: 0.40"
+        - "input_per_mtok: 0.60"
+        - "output_per_mtok: 2.40"
+        - "input_per_mtok: 3.00"
+        - "output_per_mtok: 15.00"
+    tiers:
+      small: {input: 0.10, output: 0.40}
+      medium: {input: 0.60, output: 2.40}
+      large: {input: 3.00, output: 15.00}
+
+  - id: gateway-narrow
+    label: Gateway narrow table
+    kind: repo
+    description: >-
+      The gateway benchmark's second table, where the large tier costs only about 4x the small tier on output. It shows
+      how much of any routing saving is the price gap rather than the router.
+    source:
+      repo: semantic-cache-gateway
+      path: src/cache_gateway/bench.py
+      contains:
+        - "prices = {Tier.SMALL: (1.0, 4.0), Tier.MEDIUM: (1.5, 6.0), Tier.LARGE: (3.0, 15.0)}"
+    tiers:
+      small: {input: 1.0, output: 4.0}
+      medium: {input: 1.5, output: 6.0}
+      large: {input: 3.0, output: 15.0}
+
+  - id: trajectory-flat
+    label: Trajectory-gate flat table
+    kind: repo
+    description: >-
+      The single illustrative price of a small hosted model used by trajectory-eval-gate's example agent. Every tier
+      costs the same, so routing has no effect under this table.
+    source:
+      repo: trajectory-eval-gate
+      path: src/trajectory_gate/example/agent.py
+      contains:
+        - "PRICE_IN_PER_MTOK = 0.50"
+        - "PRICE_OUT_PER_MTOK = 1.50"
+    tiers:
+      small: {input: 0.50, output: 1.50}
+      medium: {input: 0.50, output: 1.50}
+      large: {input: 0.50, output: 1.50}
+
+  - id: scenario-premium-large
+    label: "Scenario: premium large tier"
+    kind: scenario
+    description: >-
+      HYPOTHETICAL, defined in this repository only. The gateway's illustrative small and medium prices with a large
+      tier five times more expensive (15/75), standing in for a reasoning-class model. It is a stress test of how
+      much each task depends on its large-tier calls, not a quote.
+    tiers:
+      small: {input: 0.10, output: 0.40}
+      medium: {input: 0.60, output: 2.40}
+      large: {input: 15.00, output: 75.00}
+
+measurements:
+  # --- semantic-cache-gateway: cache hit rates and the routed tier mix on its synthetic workloads
+  - {id: gateway.support.requests, value: 3000, unit: requests, repo: semantic-cache-gateway,
+     path: benchmarks/results/ablation.json, pointer: /workloads/support/rows/0/requests,
+     description: "Requests in the synthetic support workload"}
+  - {id: gateway.support.hit_rate.exact, value: 0.32233, unit: share, repo: semantic-cache-gateway,
+     path: benchmarks/results/ablation.json, pointer: /workloads/support/rows/1/cache_hit_rate,
+     description: "Exact-cache hit rate, support workload"}
+  - {id: gateway.support.hit_rate.exact_semantic, value: 0.47167, unit: share, repo: semantic-cache-gateway,
+     path: benchmarks/results/ablation.json, pointer: /workloads/support/rows/2/cache_hit_rate,
+     description: "Exact + semantic cache hit rate (bge-small, threshold 0.94, guard rails on), support workload"}
+  - {id: gateway.assistant.hit_rate.exact_semantic, value: 0.29433, unit: share, repo: semantic-cache-gateway,
+     path: benchmarks/results/ablation.json, pointer: /workloads/assistant/rows/2/cache_hit_rate,
+     description: "Exact + semantic cache hit rate, assistant workload"}
+  - {id: gateway.support.false_hit_rate, value: 0.004464, unit: share of semantic hits, repo: semantic-cache-gateway,
+     path: benchmarks/results/ablation.json, pointer: /workloads/support/rows/2/false_hit_rate,
+     description: "Wrong answers among semantic hits at the default threshold, support workload"}
+  - {id: gateway.support.routed.logistic.small, value: 1790, unit: requests, repo: semantic-cache-gateway,
+     path: benchmarks/results/ablation.json, pointer: /workloads/support/rows/6/served_tiers/small,
+     description: "Requests routed to the small tier (cache + logistic router), support workload"}
+  - {id: gateway.support.routed.logistic.medium, value: 825, unit: requests, repo: semantic-cache-gateway,
+     path: benchmarks/results/ablation.json, pointer: /workloads/support/rows/6/served_tiers/medium,
+     description: "Requests routed to the medium tier (cache + logistic router), support workload"}
+  - {id: gateway.support.routed.logistic.large, value: 385, unit: requests, repo: semantic-cache-gateway,
+     path: benchmarks/results/ablation.json, pointer: /workloads/support/rows/6/served_tiers/large,
+     description: "Requests routed to the large tier (cache + logistic router), support workload"}
+  - {id: gateway.support.routed.rules.small, value: 1256, unit: requests, repo: semantic-cache-gateway,
+     path: benchmarks/results/ablation.json, pointer: /workloads/support/rows/5/served_tiers/small,
+     description: "Requests routed to the small tier (cache + rules router), support workload"}
+  - {id: gateway.support.routed.rules.medium, value: 1169, unit: requests, repo: semantic-cache-gateway,
+     path: benchmarks/results/ablation.json, pointer: /workloads/support/rows/5/served_tiers/medium,
+     description: "Requests routed to the medium tier (cache + rules router), support workload"}
+  - {id: gateway.support.routed.rules.large, value: 575, unit: requests, repo: semantic-cache-gateway,
+     path: benchmarks/results/ablation.json, pointer: /workloads/support/rows/5/served_tiers/large,
+     description: "Requests routed to the large tier (cache + rules router), support workload"}
+  - {id: gateway.support.under_routed.logistic, value: 0.137, unit: share, repo: semantic-cache-gateway,
+     path: benchmarks/results/ablation.json, pointer: /workloads/support/rows/6/under_routed_rate, tolerance: 0.0005,
+     description: "Requests answered by a smaller tier than the author's label (cache + logistic router)"}
+  - {id: gateway.support.under_routed.rules, value: 0.047, unit: share, repo: semantic-cache-gateway,
+     path: benchmarks/results/ablation.json, pointer: /workloads/support/rows/5/under_routed_rate, tolerance: 0.0005,
+     description: "Requests answered by a smaller tier than the author's label (cache + rules router)"}
+  - {id: gateway.overhead.miss_p50_ms, value: 42.596, unit: ms, repo: semantic-cache-gateway,
+     path: benchmarks/results/overhead.json, pointer: /profiles/0/paths/miss/p50_ms,
+     description: "Time inside the gateway for a cache miss with a bge-small embedding (median)"}
+  - {id: gateway.overhead.exact_p50_ms, value: 0.3762, unit: ms, repo: semantic-cache-gateway,
+     path: benchmarks/results/overhead.json, pointer: /profiles/0/paths/exact/p50_ms,
+     description: "Time inside the gateway for an exact-cache hit (median)"}
+
+  # --- self-correcting-agentic-rag: rewrite rounds and pipeline latency (test split, models backend)
+  - {id: rag.rewrite_rounds_mean, value: 0.42029, unit: rounds per question, repo: self-correcting-agentic-rag,
+     path: benchmarks/results/benchmark-models.json, pointer: /test_rewrites, derive: histogram_mean,
+     description: "Mean rewrite rounds per test question (histogram {0: 52, 1: 5, 2: 12})"}
+  - {id: rag.latency_agentic_mean_ms, value: 1660.368, unit: ms, repo: self-correcting-agentic-rag,
+     path: benchmarks/results/benchmark-models.json, pointer: /latency_ms/agentic_mean,
+     description: "Mean CPU time per question of the agentic pipeline (embeddings + cross-encoder, extractive writer)"}
+  - {id: rag.latency_naive_mean_ms, value: 325.685, unit: ms, repo: self-correcting-agentic-rag,
+     path: benchmarks/results/benchmark-models.json, pointer: /latency_ms/naive_mean,
+     description: "Mean CPU time per question of naive RAG"}
+
+  # --- context-assembler-engine: how large a support prompt must be to keep every planted fact
+  - {id: assembler.scenario_tokens_mean, value: 5105, unit: tokens, repo: context-assembler-engine,
+     path: benchmarks/results/benchmark.json, pointer: /scenario_source_tokens/mean,
+     description: "Mean size of the synthetic support conversations before assembly"}
+  - {id: assembler.retention_at_2048, value: 95.4, unit: percent, repo: context-assembler-engine,
+     path: benchmarks/results/benchmark.json, pointer: /per_budget/engine/2048/fact_retention_pct,
+     description: "Required-fact retention of the engine at a 2,048-token prompt budget"}
+  - {id: assembler.retention_at_3072, value: 100.0, unit: percent, repo: context-assembler-engine,
+     path: benchmarks/results/benchmark.json, pointer: /per_budget/engine/3072/fact_retention_pct,
+     description: "Required-fact retention of the engine at a 3,072-token prompt budget"}
+  - {id: assembler.latency_p50_ms, value: 37.6, unit: ms, repo: context-assembler-engine,
+     path: benchmarks/results/benchmark.json, pointer: /overall/engine/latency_p50_ms,
+     description: "Median assembly time (busy laptop CPU)"}
+
+  # --- three-tier-agent-memory: session shape and consolidation volume of the synthetic benchmark
+  - {id: memory.turns, value: 7568, unit: turns, repo: three-tier-agent-memory,
+     path: benchmarks/results/benchmark.json, pointer: /meta/turns,
+     description: "Conversation turns in the benchmark (50 users x 10 sessions)"}
+  - {id: memory.sessions, value: 500, unit: sessions, repo: three-tier-agent-memory,
+     path: benchmarks/results/benchmark.json, pointer: /consolidation/episodes,
+     description: "Sessions consolidated into episodes"}
+  - {id: memory.consolidation_raw_tokens, value: 56609, unit: tokens, repo: three-tier-agent-memory,
+     path: benchmarks/results/benchmark.json, pointer: /consolidation/raw_tokens,
+     description: "Raw tokens flushed to consolidation over all sessions (approximate counter)"}
+  - {id: memory.recall_p50_ms, value: 1.65, unit: ms, repo: three-tier-agent-memory,
+     path: benchmarks/results/benchmark.json, pointer: /systems/2/latency_ms_p50, tolerance: 0.005,
+     description: "Median tiered recall time, retrieval only"}
+  - {id: memory.embed_p50_ms, value: 23.559, unit: ms, repo: three-tier-agent-memory,
+     path: benchmarks/results/benchmark.json, pointer: /meta/question_embedding_ms_p50,
+     description: "Median time to embed the recall query with bge-small"}
+
+  # --- inter-agent-security-proxy and raw-mcp-tool-server: per-message and per-call latency
+  - {id: proxy.screen_hashing_short_p50_ms, value: 3.7, unit: ms, repo: inter-agent-security-proxy,
+     path: benchmarks/results/latency.json,
+     pointer: "/groups/short messages/stages/full screen with hashing (detect + mask + spotlight)/p50_ms",
+     tolerance: 0.05, description: "Full screening of a short message with the hashing classifier (median)"}
+  - {id: proxy.screen_bge_short_p50_ms, value: 34.4, unit: ms, repo: inter-agent-security-proxy,
+     path: benchmarks/results/latency.json,
+     pointer: "/groups/short messages/stages/full screen with bge-small (detect + mask + spotlight)/p50_ms",
+     tolerance: 0.05, description: "Full screening of a short message with the bge-small classifier (median)"}
+  - {id: mcp.calculate_p50_ms, value: 1.077, unit: ms, repo: raw-mcp-tool-server,
+     path: benchmarks/results/stdio_benchmark.json, pointer: "/latency/rawmcp · calculate (2026-07-28)/p50_ms",
+     description: "tools/call round trip over stdio (median)"}
+  - {id: mcp.run_python_p50_ms, value: 305.154, unit: ms, repo: raw-mcp-tool-server,
+     path: benchmarks/results/stdio_benchmark.json, pointer: "/latency/rawmcp · run_python sandbox (2026-07-28)/p50_ms",
+     description: "run_python in the subprocess sandbox over stdio (median, Windows process start-up)"}
+
+  # --- durable-agent-state-machine: cost of durability and of crashes
+  - {id: durable.step_overhead_ms, value: 1.971, unit: ms per step, repo: durable-agent-state-machine,
+     path: benchmarks/results/overhead.json, pointer: /per_step/0/ms_per_step,
+     description: "Median cost of one durable step (synchronous=NORMAL, checkpoint every transition)"}
+  - {id: durable.chaos.runs, value: 756, unit: runs, repo: durable-agent-state-machine,
+     path: benchmarks/results/chaos.json, pointer: /outbox/runs, description: "Runs in the chaos benchmark (outbox)"}
+  - {id: durable.chaos.kills, value: 200, unit: kills, repo: durable-agent-state-machine,
+     path: benchmarks/results/chaos.json, pointer: /outbox/kills, description: "Worker processes killed"}
+  - {id: durable.chaos.in_doubt_attempts, value: 89, unit: attempts, repo: durable-agent-state-machine,
+     path: benchmarks/results/chaos.json, pointer: /outbox/in_doubt_attempts,
+     description: "Interrupted attempts re-run after a takeover (WorkerLost)"}
+  - {id: durable.chaos.completed_step_reexecutions, value: 0, unit: steps, repo: durable-agent-state-machine,
+     path: benchmarks/results/chaos.json, pointer: /outbox/completed_step_reexecutions,
+     description: "Completed steps executed again after a crash"}
+  - {id: durable.chaos.direct_duplicates, value: 10, unit: runs, repo: durable-agent-state-machine,
+     path: benchmarks/results/chaos.json, pointer: /direct/duplicate_publications,
+     description: "Runs published twice when the side effect is called directly (baseline)"}
+
+  # --- trajectory-eval-gate: what one agent run costs, and how many runs a pull request needs
+  - {id: trajectory.run.llm_calls, value: 5.9, unit: calls per run, repo: trajectory-eval-gate,
+     path: examples/travel_desk/baseline.jsonl, derive: trajectory_llm_calls_per_run,
+     description: "LLM turns per run of the scripted travel-desk agent (mean over 100 baseline runs)"}
+  - {id: trajectory.run.tokens_in, value: 4481.59, unit: tokens per run, repo: trajectory-eval-gate,
+     path: examples/travel_desk/baseline.jsonl, derive: trajectory_tokens_in_per_run,
+     description: "Input tokens per run (simulated by the scripted agent, mean over 100 baseline runs)"}
+  - {id: trajectory.run.tokens_out, value: 252.1, unit: tokens per run, repo: trajectory-eval-gate,
+     path: examples/travel_desk/baseline.jsonl, derive: trajectory_tokens_out_per_run,
+     description: "Output tokens per run (simulated by the scripted agent, mean over 100 baseline runs)"}
+  - {id: trajectory.grade_ms_mean, value: 6.89, unit: ms, repo: trajectory-eval-gate,
+     path: benchmarks/results/benchmark.json, pointer: /runtime/grade_ms_per_trajectory_mean,
+     description: "Mean time to grade one trajectory against its golden DAG"}
+
+  # --- typed-multi-agent-swarm: agent calls, payload tokens and success per configuration (600 episodes each)
+  # tokens_mean is the swarm's own estimate: (request JSON + reply) characters / 4, summed over the calls.
+  - {id: swarm.r1.a0.6.calls, value: 4.5417, unit: calls, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/grid~1r1~1a0.6/metrics/calls_mean, description: "Agent calls per task"}
+  - {id: swarm.r1.a0.6.tokens, value: 2594, unit: tokens, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/grid~1r1~1a0.6/metrics/tokens_mean, description: "Payload tokens per task"}
+  - {id: swarm.r1.a0.6.success, value: 0.6983, unit: share, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/grid~1r1~1a0.6/metrics/success_rate, description: "Tasks ending with a correct accepted solution"}
+  - {id: swarm.r1.a0.7.calls, value: 4.3983, unit: calls, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/grid~1r1~1a0.7/metrics/calls_mean, description: "Agent calls per task"}
+  - {id: swarm.r1.a0.7.tokens, value: 2496, unit: tokens, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/grid~1r1~1a0.7/metrics/tokens_mean, description: "Payload tokens per task"}
+  - {id: swarm.r1.a0.7.success, value: 0.7883, unit: share, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/grid~1r1~1a0.7/metrics/success_rate, description: "Tasks ending with a correct accepted solution"}
+  - {id: swarm.r1.a0.8.calls, value: 4.2517, unit: calls, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/grid~1r1~1a0.8/metrics/calls_mean, description: "Agent calls per task"}
+  - {id: swarm.r1.a0.8.tokens, value: 2399, unit: tokens, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/grid~1r1~1a0.8/metrics/tokens_mean, description: "Payload tokens per task"}
+  - {id: swarm.r1.a0.8.success, value: 0.8583, unit: share, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/grid~1r1~1a0.8/metrics/success_rate, description: "Tasks ending with a correct accepted solution"}
+  - {id: swarm.r1.a0.9.calls, value: 4.1283, unit: calls, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/grid~1r1~1a0.9/metrics/calls_mean, description: "Agent calls per task"}
+  - {id: swarm.r1.a0.9.tokens, value: 2309, unit: tokens, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/grid~1r1~1a0.9/metrics/tokens_mean, description: "Payload tokens per task"}
+  - {id: swarm.r1.a0.9.success, value: 0.9383, unit: share, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/grid~1r1~1a0.9/metrics/success_rate, description: "Tasks ending with a correct accepted solution"}
+  - {id: swarm.r3.a0.6.calls, value: 11.3633, unit: calls, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/grid~1r3~1a0.6/metrics/calls_mean, description: "Agent calls per task"}
+  - {id: swarm.r3.a0.6.tokens, value: 6868, unit: tokens, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/grid~1r3~1a0.6/metrics/tokens_mean, description: "Payload tokens per task"}
+  - {id: swarm.r3.a0.6.success, value: 0.825, unit: share, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/grid~1r3~1a0.6/metrics/success_rate, description: "Tasks ending with a correct accepted solution"}
+  - {id: swarm.r3.a0.7.calls, value: 10.19, unit: calls, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/grid~1r3~1a0.7/metrics/calls_mean, description: "Agent calls per task"}
+  - {id: swarm.r3.a0.7.tokens, value: 6043, unit: tokens, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/grid~1r3~1a0.7/metrics/tokens_mean, description: "Payload tokens per task"}
+  - {id: swarm.r3.a0.7.success, value: 0.9033, unit: share, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/grid~1r3~1a0.7/metrics/success_rate, description: "Tasks ending with a correct accepted solution"}
+  - {id: swarm.r3.a0.8.calls, value: 9.0967, unit: calls, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/grid~1r3~1a0.8/metrics/calls_mean, description: "Agent calls per task"}
+  - {id: swarm.r3.a0.8.tokens, value: 5287, unit: tokens, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/grid~1r3~1a0.8/metrics/tokens_mean, description: "Payload tokens per task"}
+  - {id: swarm.r3.a0.8.success, value: 0.9433, unit: share, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/grid~1r3~1a0.8/metrics/success_rate, description: "Tasks ending with a correct accepted solution"}
+  - {id: swarm.r3.a0.9.calls, value: 7.9217, unit: calls, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/grid~1r3~1a0.9/metrics/calls_mean, description: "Agent calls per task"}
+  - {id: swarm.r3.a0.9.tokens, value: 4440, unit: tokens, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/grid~1r3~1a0.9/metrics/tokens_mean, description: "Payload tokens per task"}
+  - {id: swarm.r3.a0.9.success, value: 0.9817, unit: share, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/grid~1r3~1a0.9/metrics/success_rate, description: "Tasks ending with a correct accepted solution"}
+  - {id: swarm.r5.a0.6.calls, value: 16.255, unit: calls, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/grid~1r5~1a0.6/metrics/calls_mean, description: "Agent calls per task"}
+  - {id: swarm.r5.a0.6.tokens, value: 10400, unit: tokens, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/grid~1r5~1a0.6/metrics/tokens_mean, description: "Payload tokens per task"}
+  - {id: swarm.r5.a0.6.success, value: 0.805, unit: share, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/grid~1r5~1a0.6/metrics/success_rate, description: "Tasks ending with a correct accepted solution"}
+  - {id: swarm.r5.a0.7.calls, value: 14.1267, unit: calls, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/grid~1r5~1a0.7/metrics/calls_mean, description: "Agent calls per task"}
+  - {id: swarm.r5.a0.7.tokens, value: 8716, unit: tokens, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/grid~1r5~1a0.7/metrics/tokens_mean, description: "Payload tokens per task"}
+  - {id: swarm.r5.a0.7.success, value: 0.9067, unit: share, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/grid~1r5~1a0.7/metrics/success_rate, description: "Tasks ending with a correct accepted solution"}
+  - {id: swarm.r5.a0.8.calls, value: 11.4617, unit: calls, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/grid~1r5~1a0.8/metrics/calls_mean, description: "Agent calls per task"}
+  - {id: swarm.r5.a0.8.tokens, value: 6605, unit: tokens, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/grid~1r5~1a0.8/metrics/tokens_mean, description: "Payload tokens per task"}
+  - {id: swarm.r5.a0.8.success, value: 0.9683, unit: share, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/grid~1r5~1a0.8/metrics/success_rate, description: "Tasks ending with a correct accepted solution"}
+  - {id: swarm.r5.a0.9.calls, value: 9.9767, unit: calls, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/grid~1r5~1a0.9/metrics/calls_mean, description: "Agent calls per task"}
+  - {id: swarm.r5.a0.9.tokens, value: 5359, unit: tokens, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/grid~1r5~1a0.9/metrics/tokens_mean, description: "Payload tokens per task"}
+  - {id: swarm.r5.a0.9.success, value: 0.985, unit: share, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/grid~1r5~1a0.9/metrics/success_rate, description: "Tasks ending with a correct accepted solution"}
+  - {id: swarm.single.calls, value: 2.165, unit: calls, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/topology~1single/metrics/calls_mean, description: "Agent calls per task, single coder"}
+  - {id: swarm.single.tokens, value: 1201, unit: tokens, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/topology~1single/metrics/tokens_mean, description: "Payload tokens per task, single coder"}
+  - {id: swarm.single.success, value: 0.62, unit: share, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/topology~1single/metrics/success_rate, description: "Correct accepted solutions, single coder"}
+  - {id: swarm.coder_executor.calls, value: 2.2983, unit: calls, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/topology~1coder-executor/metrics/calls_mean, description: "Agent calls per task, coder + executor"}
+  - {id: swarm.coder_executor.tokens, value: 1308, unit: tokens, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/topology~1coder-executor/metrics/tokens_mean, description: "Payload tokens per task, coder + executor"}
+  - {id: swarm.coder_executor.success, value: 0.72, unit: share, repo: typed-multi-agent-swarm, path: benchmarks/results/swarm_benchmark.json, pointer: /experiments/topology~1coder-executor/metrics/success_rate, description: "Correct accepted solutions, coder + executor"}
+
+assumptions:
+  # Support answer
+  - {id: support.prompt_tokens, value: 3072, unit: tokens,
+     rationale: "Prompt budget for one support answer: the smallest budget at which the context assembler kept every planted fact in its benchmark (measurement assembler.retention_at_3072)."}
+  - {id: support.answer_tokens, value: 250, unit: tokens,
+     rationale: "Mean answer length. The agentic RAG generator caps answers at max_tokens=500 (generate.py); half of the cap is assumed."}
+  - {id: support.rewrite_input_tokens, value: 400, unit: tokens,
+     rationale: "An LLM query rewrite sees the question, the grader's diagnosis and an instruction block; no repository measures it."}
+  - {id: support.rewrite_output_tokens, value: 120, unit: tokens,
+     rationale: "A few rewritten queries returned as JSON."}
+  - {id: memory.llm_calls_per_session, value: 2, unit: calls,
+     rationale: "With a key, consolidation runs an LLM summary and an LLM fact extraction; one consolidation per session is assumed."}
+  - {id: memory.prompt_overhead_tokens, value: 400, unit: tokens,
+     rationale: "Instructions and output schema around the flushed turns of a consolidation call."}
+  - {id: memory.output_tokens, value: 150, unit: tokens, rationale: "A short summary or a JSON list of facts."}
+  # Coding task
+  - {id: swarm.system_prompt_tokens, value: 800, unit: tokens per call,
+     rationale: "Role instructions plus the JSON schema of the expected artifact, which the offline payload estimate leaves out. Order of magnitude implied by agents/prompts.py, not measured."}
+  - {id: swarm.output_share, value: 0.35, unit: share of payload tokens,
+     rationale: "The swarm reports request + reply tokens as one number; replies (code, votes) are assumed to be 35% of it."}
+  # Research workflow
+  - {id: research.plan_input_tokens, value: 1200, unit: tokens, rationale: "Brief, instructions and the plan schema."}
+  - {id: research.plan_output_tokens, value: 300, unit: tokens, rationale: "A handful of research questions."}
+  - {id: research.draft_input_tokens, value: 8192, unit: tokens,
+     rationale: "Draft prompt filled to the largest budget of the context assembler's sweep (8,192), where its fact retention is 100%."}
+  - {id: research.draft_output_tokens, value: 1200, unit: tokens, rationale: "A one-page brief."}
+  # Pull-request gate
+  - {id: gate.cases, value: 5, unit: cases,
+     rationale: "The travel-desk suite has five cases (trajectory-eval-gate benchmark setup)."}
+  - {id: gate.candidate_runs_per_case, value: 3, unit: runs,
+     rationale: "Runs per case for each pull request, as in the trajectory-eval-gate benchmark (benchmark.json /setup/candidate_run_set)."}
+  - {id: gate.baseline_runs_per_case, value: 20, unit: runs,
+     rationale: "Baseline runs per case, as in the trajectory-eval-gate benchmark."}
+  - {id: gate.prs_per_baseline, value: 20, unit: pull requests,
+     rationale: "The baseline is re-recorded once every 20 merged pull requests, so its cost is spread over 20."}
+  - {id: gate.judge_input_tokens, value: 900, unit: tokens,
+     rationale: "Only for the optional LLM judge: rubric, facts and the final reply."}
+  - {id: gate.judge_output_tokens, value: 150, unit: tokens, rationale: "A JSON verdict with a short rationale."}

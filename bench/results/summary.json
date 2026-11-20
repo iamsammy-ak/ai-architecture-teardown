@@ -1,0 +1,166 @@
+{
+  "command": "python -m teardown bench",
+  "runs": [
+    {
+      "repo": "durable-agent-state-machine",
+      "commit": "5facc0f0b769a2e68a57b8601f0730d9f8d4382f",
+      "mode": "fast",
+      "status": "passed",
+      "reason": "",
+      "started": "2026-11-20T19:57:10+00:00",
+      "seconds": 226.4,
+      "python": "Python 3.13.2",
+      "comparable": false,
+      "steps": [
+        {
+          "phase": "clone",
+          "command": "git clone https://github.com/iamsammy-ak/durable-agent-state-machine.git",
+          "returncode": 0,
+          "seconds": 1.4
+        },
+        {
+          "phase": "venv",
+          "command": "python -m venv venv",
+          "returncode": 0,
+          "seconds": 22.5
+        },
+        {
+          "phase": "install",
+          "command": "python -m pip install -e \".[dev]\"",
+          "returncode": 0,
+          "seconds": 171.4
+        },
+        {
+          "phase": "benchmark",
+          "command": "python benchmarks/chaos_bench.py --runs 12 --crashes 6 --workers 2 --seed 7 --lease-ttl 1",
+          "returncode": 0,
+          "seconds": 30.3
+        }
+      ],
+      "files": [
+        {
+          "path": "benchmarks/results/chaos.json",
+          "exists": true,
+          "bytes": 6954,
+          "sha256": "fce370da706bb2bd1bc3cabc308571cce9d2fc874e781fbf1821251fc6297484",
+          "changed": true
+        },
+        {
+          "path": "benchmarks/results/chaos.md",
+          "exists": true,
+          "bytes": 2494,
+          "sha256": "d401583b77e18a7fafb0634c3ce840845a44d50c9566548d874eddef170b4d3a",
+          "changed": true
+        }
+      ],
+      "headline": [
+        {
+          "label": "runs ending as expected (share)",
+          "file": "benchmarks/results/chaos.json",
+          "pointer": "/outbox/completion_rate",
+          "fresh": 1.0,
+          "committed": 1.0
+        },
+        {
+          "label": "duplicate publications, outbox",
+          "file": "benchmarks/results/chaos.json",
+          "pointer": "/outbox/duplicate_publications",
+          "fresh": 0.0,
+          "committed": 0.0
+        },
+        {
+          "label": "duplicate publications, direct call",
+          "file": "benchmarks/results/chaos.json",
+          "pointer": "/direct/duplicate_publications",
+          "fresh": 0.0,
+          "committed": 10.0
+        },
+        {
+          "label": "completed steps executed again",
+          "file": "benchmarks/results/chaos.json",
+          "pointer": "/outbox/completed_step_reexecutions",
+          "fresh": 0.0,
+          "committed": 0.0
+        }
+      ],
+      "log_tail": []
+    },
+    {
+      "repo": "trajectory-eval-gate",
+      "commit": "3921ccec986ce71b8922398b69a055b9217073cb",
+      "mode": "fast",
+      "status": "passed",
+      "reason": "",
+      "started": "2026-11-20T19:51:30+00:00",
+      "seconds": 328.9,
+      "python": "Python 3.13.2",
+      "comparable": true,
+      "steps": [
+        {
+          "phase": "clone",
+          "command": "git clone https://github.com/iamsammy-ak/trajectory-eval-gate.git",
+          "returncode": 0,
+          "seconds": 1.3
+        },
+        {
+          "phase": "venv",
+          "command": "python -m venv venv",
+          "returncode": 0,
+          "seconds": 16.8
+        },
+        {
+          "phase": "install",
+          "command": "python -m pip install -e \".[dev]\"",
+          "returncode": 0,
+          "seconds": 253.2
+        },
+        {
+          "phase": "benchmark",
+          "command": "python benchmarks/run_benchmarks.py",
+          "returncode": 0,
+          "seconds": 57.1
+        }
+      ],
+      "files": [
+        {
+          "path": "benchmarks/results/benchmark.json",
+          "exists": true,
+          "bytes": 10620,
+          "sha256": "10e4a80c79d69fb956c4493acc48359be19ca3261cbf7b4f04393523284660d3",
+          "changed": true
+        },
+        {
+          "path": "benchmarks/results/benchmark.md",
+          "exists": true,
+          "bytes": 2925,
+          "sha256": "f4d94f7988fd2ffc95a9d2000a838df0846ce148a965beabbc736b21e2456e9f",
+          "changed": true
+        }
+      ],
+      "headline": [
+        {
+          "label": "regressions blocked, trajectory gate (%)",
+          "file": "benchmarks/results/benchmark.json",
+          "pointer": "/summary/regression_detection_pct/trajectory_gate",
+          "fresh": 100.0,
+          "committed": 100.0
+        },
+        {
+          "label": "regressions blocked, outcome-only (%)",
+          "file": "benchmarks/results/benchmark.json",
+          "pointer": "/summary/regression_detection_pct/outcome_only",
+          "fresh": 55.3,
+          "committed": 55.3
+        },
+        {
+          "label": "benign run sets blocked (%)",
+          "file": "benchmarks/results/benchmark.json",
+          "pointer": "/summary/benign_false_positive_pct/trajectory_gate",
+          "fresh": 16.5,
+          "committed": 16.5
+        }
+      ],
+      "log_tail": []
+    }
+  ]
+}

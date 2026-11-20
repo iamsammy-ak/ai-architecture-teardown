@@ -1,0 +1,376 @@
+{
+  "version": "0.1.0",
+  "command": "PYTHONPATH=src python benchmarks/run_benchmarks.py",
+  "data": "synthetic: the bundled scripted travel-desk agent and its simulated tools (5 cases)",
+  "setup": {
+    "baseline": "healthy agent, 20 runs per case (examples/travel_desk/baseline.jsonl)",
+    "candidate_run_set": "3 runs per case x 5 cases",
+    "trials_per_scenario": 45,
+    "fault_rates": [
+      1.0,
+      0.67,
+      0.34
+    ],
+    "judge": "offline heuristic judge (no LLM)",
+    "similarity": "hashing embedder",
+    "policy": "src/trajectory_gate/example/data/gate.yml",
+    "price_assumption_usd_per_mtok": {
+      "input": 0.5,
+      "output": 1.5
+    }
+  },
+  "summary": {
+    "regression_detection_pct": {
+      "trajectory_gate": 100.0,
+      "outcome_only": 55.3
+    },
+    "benign_false_positive_pct": {
+      "trajectory_gate": 16.5,
+      "without_flaky_handling": 46.4,
+      "outcome_only": 5.1
+    }
+  },
+  "scenarios": {
+    "skip_verification": {
+      "kind": "regression",
+      "name": "skip_verification",
+      "label": "skipped verification",
+      "run_sets": 45,
+      "counted_run_sets": 41,
+      "gate_blocked_pct": 100.0,
+      "gate_without_flaky_handling_blocked_pct": 100.0,
+      "outcome_only_blocked_pct": 19.5,
+      "blocking_rules": {
+        "case_regression": 41,
+        "min_pass_rate": 32,
+        "mean_score_drop": 7
+      },
+      "fault_never_fired": 4,
+      "gate_blocked_pct_by_fault_rate": {
+        "1.0": 100.0,
+        "0.67": 100.0,
+        "0.34": 100.0
+      },
+      "faulty_runs": 171,
+      "faulty_runs_flagged_pct": 100.0,
+      "faulty_runs_outcome_flagged_pct": 0.0
+    },
+    "wrong_order": {
+      "kind": "regression",
+      "name": "wrong_order",
+      "label": "wrong order",
+      "run_sets": 45,
+      "counted_run_sets": 45,
+      "gate_blocked_pct": 100.0,
+      "gate_without_flaky_handling_blocked_pct": 100.0,
+      "outcome_only_blocked_pct": 8.9,
+      "blocking_rules": {
+        "case_regression": 45,
+        "min_pass_rate": 41,
+        "mean_score_drop": 4
+      },
+      "fault_never_fired": 0,
+      "gate_blocked_pct_by_fault_rate": {
+        "1.0": 100.0,
+        "0.67": 100.0,
+        "0.34": 100.0
+      },
+      "faulty_runs": 356,
+      "faulty_runs_flagged_pct": 100.0,
+      "faulty_runs_outcome_flagged_pct": 0.0
+    },
+    "extra_costly_calls": {
+      "kind": "regression",
+      "name": "extra_costly_calls",
+      "label": "extra costly calls",
+      "run_sets": 45,
+      "counted_run_sets": 45,
+      "gate_blocked_pct": 100.0,
+      "gate_without_flaky_handling_blocked_pct": 100.0,
+      "outcome_only_blocked_pct": 13.3,
+      "blocking_rules": {
+        "case_regression": 45,
+        "min_pass_rate": 41,
+        "mean_score_drop": 39,
+        "cost_increase_pct": 37
+      },
+      "fault_never_fired": 0,
+      "gate_blocked_pct_by_fault_rate": {
+        "1.0": 100.0,
+        "0.67": 100.0,
+        "0.34": 100.0
+      },
+      "faulty_runs": 449,
+      "faulty_runs_flagged_pct": 100.0,
+      "faulty_runs_outcome_flagged_pct": 3.3
+    },
+    "forbidden_tool": {
+      "kind": "regression",
+      "name": "forbidden_tool",
+      "label": "forbidden tool",
+      "run_sets": 45,
+      "counted_run_sets": 45,
+      "gate_blocked_pct": 100.0,
+      "gate_without_flaky_handling_blocked_pct": 100.0,
+      "outcome_only_blocked_pct": 86.7,
+      "blocking_rules": {
+        "forbidden_steps": 45,
+        "case_regression": 45,
+        "min_pass_rate": 41,
+        "mean_score_drop": 21,
+        "cost_increase_pct": 18
+      },
+      "fault_never_fired": 0,
+      "gate_blocked_pct_by_fault_rate": {
+        "1.0": 100.0,
+        "0.67": 100.0,
+        "0.34": 100.0
+      },
+      "faulty_runs": 367,
+      "faulty_runs_flagged_pct": 100.0,
+      "faulty_runs_outcome_flagged_pct": 24.5
+    },
+    "wrong_arguments": {
+      "kind": "regression",
+      "name": "wrong_arguments",
+      "label": "wrong arguments",
+      "run_sets": 45,
+      "counted_run_sets": 45,
+      "gate_blocked_pct": 100.0,
+      "gate_without_flaky_handling_blocked_pct": 100.0,
+      "outcome_only_blocked_pct": 100.0,
+      "blocking_rules": {
+        "case_regression": 45,
+        "min_pass_rate": 45,
+        "mean_score_drop": 40
+      },
+      "fault_never_fired": 0,
+      "gate_blocked_pct_by_fault_rate": {
+        "1.0": 100.0,
+        "0.67": 100.0,
+        "0.34": 100.0
+      },
+      "faulty_runs": 468,
+      "faulty_runs_flagged_pct": 100.0,
+      "faulty_runs_outcome_flagged_pct": 82.9
+    },
+    "ungrounded_reply": {
+      "kind": "regression",
+      "name": "ungrounded_reply",
+      "label": "ungrounded reply",
+      "run_sets": 45,
+      "counted_run_sets": 45,
+      "gate_blocked_pct": 100.0,
+      "gate_without_flaky_handling_blocked_pct": 100.0,
+      "outcome_only_blocked_pct": 100.0,
+      "blocking_rules": {
+        "case_regression": 45,
+        "min_pass_rate": 41,
+        "mean_score_drop": 31
+      },
+      "fault_never_fired": 0,
+      "gate_blocked_pct_by_fault_rate": {
+        "1.0": 100.0,
+        "0.67": 100.0,
+        "0.34": 100.0
+      },
+      "faulty_runs": 443,
+      "faulty_runs_flagged_pct": 100.0,
+      "faulty_runs_outcome_flagged_pct": 100.0
+    },
+    "none": {
+      "kind": "benign",
+      "name": "none",
+      "label": "seed noise only",
+      "run_sets": 45,
+      "counted_run_sets": 45,
+      "gate_blocked_pct": 0.0,
+      "gate_without_flaky_handling_blocked_pct": 28.9,
+      "outcome_only_blocked_pct": 0.0,
+      "blocking_rules": {},
+      "clean_runs": 662,
+      "clean_runs_flagged_pct": 0.0,
+      "clean_runs_outcome_flagged_pct": 0.0
+    },
+    "reorder": {
+      "kind": "benign",
+      "name": "reorder",
+      "label": "reordered calls",
+      "run_sets": 45,
+      "counted_run_sets": 45,
+      "gate_blocked_pct": 11.1,
+      "gate_without_flaky_handling_blocked_pct": 40.0,
+      "outcome_only_blocked_pct": 11.1,
+      "blocking_rules": {
+        "case_regression": 5,
+        "mean_score_drop": 3
+      },
+      "clean_runs": 651,
+      "clean_runs_flagged_pct": 0.0,
+      "clean_runs_outcome_flagged_pct": 0.0
+    },
+    "retries": {
+      "kind": "benign",
+      "name": "retries",
+      "label": "transient retries",
+      "run_sets": 45,
+      "counted_run_sets": 45,
+      "gate_blocked_pct": 0.0,
+      "gate_without_flaky_handling_blocked_pct": 46.7,
+      "outcome_only_blocked_pct": 0.0,
+      "blocking_rules": {},
+      "clean_runs": 654,
+      "clean_runs_flagged_pct": 0.0,
+      "clean_runs_outcome_flagged_pct": 0.0
+    },
+    "alt_channel": {
+      "kind": "benign",
+      "name": "alt_channel",
+      "label": "other notify channel",
+      "run_sets": 45,
+      "counted_run_sets": 45,
+      "gate_blocked_pct": 8.9,
+      "gate_without_flaky_handling_blocked_pct": 46.7,
+      "outcome_only_blocked_pct": 8.9,
+      "blocking_rules": {
+        "case_regression": 4,
+        "mean_score_drop": 3
+      },
+      "clean_runs": 650,
+      "clean_runs_flagged_pct": 0.0,
+      "clean_runs_outcome_flagged_pct": 0.0
+    },
+    "optional_steps": {
+      "kind": "benign",
+      "name": "optional_steps",
+      "label": "optional steps",
+      "run_sets": 45,
+      "counted_run_sets": 45,
+      "gate_blocked_pct": 2.2,
+      "gate_without_flaky_handling_blocked_pct": 31.1,
+      "outcome_only_blocked_pct": 2.2,
+      "blocking_rules": {
+        "case_regression": 1,
+        "mean_score_drop": 1
+      },
+      "clean_runs": 660,
+      "clean_runs_flagged_pct": 0.0,
+      "clean_runs_outcome_flagged_pct": 0.0
+    },
+    "paraphrase": {
+      "kind": "benign",
+      "name": "paraphrase",
+      "label": "reworded",
+      "run_sets": 45,
+      "counted_run_sets": 45,
+      "gate_blocked_pct": 4.4,
+      "gate_without_flaky_handling_blocked_pct": 42.2,
+      "outcome_only_blocked_pct": 4.4,
+      "blocking_rules": {
+        "case_regression": 2,
+        "mean_score_drop": 1
+      },
+      "clean_runs": 654,
+      "clean_runs_flagged_pct": 0.0,
+      "clean_runs_outcome_flagged_pct": 0.0
+    },
+    "mixed": {
+      "kind": "benign",
+      "name": "mixed",
+      "label": "all combined",
+      "run_sets": 45,
+      "counted_run_sets": 45,
+      "gate_blocked_pct": 88.9,
+      "gate_without_flaky_handling_blocked_pct": 88.9,
+      "outcome_only_blocked_pct": 8.9,
+      "blocking_rules": {
+        "cost_increase_pct": 36,
+        "case_regression": 4,
+        "mean_score_drop": 4
+      },
+      "clean_runs": 654,
+      "clean_runs_flagged_pct": 0.0,
+      "clean_runs_outcome_flagged_pct": 0.0
+    }
+  },
+  "calibration": {
+    "judge": "heuristic",
+    "items": 81,
+    "human_pass": 40,
+    "default": {
+      "n": 81,
+      "threshold": 0.75,
+      "accuracy": 0.8148,
+      "kappa": 0.6299,
+      "balanced_accuracy": 0.8152,
+      "true_pass": 34,
+      "false_pass": 9,
+      "true_fail": 32,
+      "false_fail": 6,
+      "fail_recall": 0.7805
+    },
+    "fitted_threshold": 0.6102,
+    "cross_validated": {
+      "n": 81,
+      "threshold": 0.648,
+      "accuracy": 0.8148,
+      "kappa": 0.6304,
+      "balanced_accuracy": 0.8159,
+      "true_pass": 36,
+      "false_pass": 11,
+      "true_fail": 30,
+      "false_fail": 4,
+      "fail_recall": 0.7317
+    },
+    "probability": {
+      "raw_brier": 0.1748,
+      "raw_ece": 0.1882,
+      "raw_log_loss": 0.7903,
+      "platt_brier": 0.1331,
+      "platt_ece": 0.1285,
+      "platt_log_loss": 0.4549,
+      "platt_a": 6.88,
+      "platt_b": -4.9443
+    },
+    "verbosity": {
+      "items": 81.0,
+      "mean_score_change": -0.001,
+      "fail_to_pass": 0.0,
+      "pass_to_fail": 5.0,
+      "padding_words": 41.0
+    },
+    "position": {
+      "pairs": 39.0,
+      "consistency": 1.0,
+      "first_position_rate": 0.4615,
+      "human_agreement": 0.8205
+    }
+  },
+  "calibration_disagreements": [
+    "b05",
+    "b11",
+    "b15",
+    "r05",
+    "r14",
+    "c06",
+    "c12",
+    "c13",
+    "c16",
+    "g11",
+    "g12",
+    "p08",
+    "p11",
+    "p12",
+    "p15"
+  ],
+  "runtime": {
+    "grade_ms_per_trajectory_mean": 2.78,
+    "grade_ms_per_trajectory_p95": 6.69,
+    "agent_simulation_ms_per_run_mean": 0.76,
+    "gate_compare_ms_mean": 9.6,
+    "trajectories_graded": 8775,
+    "python": "3.13.2",
+    "machine": "laptop CPU, single process",
+    "total_seconds": 48.0
+  }
+}

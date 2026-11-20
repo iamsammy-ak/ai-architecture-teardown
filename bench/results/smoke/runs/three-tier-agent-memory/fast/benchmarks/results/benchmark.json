@@ -1,0 +1,443 @@
+{
+  "meta": {
+    "seed": 7,
+    "users": 10,
+    "sessions_per_user": 5,
+    "turns": 926,
+    "probes": 90,
+    "probes_by_kind": {
+      "changed": 27,
+      "stable": 53,
+      "event": 10
+    },
+    "changed_probes_by_coverage": {
+      "all_covered": 19,
+      "some_uncovered": 8
+    },
+    "k": 5,
+    "budget_tokens": 200,
+    "embedder": "hashing-384",
+    "question_embedding_ms_p50": 0.123,
+    "token_counter": "approx",
+    "python": "3.13.2",
+    "data": "synthetic (seeded generator in tiered_memory/bench/synthetic.py)",
+    "growth_run": {
+      "users": 2,
+      "sessions_per_user": 10,
+      "seed": 8
+    }
+  },
+  "systems": [
+    {
+      "name": "recency-window",
+      "recall_at_k": 0.0778,
+      "stale_at_k": 0.0,
+      "recall_at_budget": 0.3333,
+      "stale_at_budget": 0.1111,
+      "recall_by_kind": {
+        "changed": 0.1852,
+        "event": 0.0,
+        "stable": 0.0377
+      },
+      "stale_at_k_by_coverage": {
+        "all_covered": 0.0,
+        "some_uncovered": 0.0
+      },
+      "latency_ms_p50": 0.04,
+      "latency_ms_p95": 0.166,
+      "items_per_user": 92.6,
+      "kb_per_user": 2.81,
+      "growth": [
+        {
+          "session": 1,
+          "items": 22.0,
+          "kb": 0.64
+        },
+        {
+          "session": 2,
+          "items": 40.8,
+          "kb": 1.21
+        },
+        {
+          "session": 3,
+          "items": 58.4,
+          "kb": 1.74
+        },
+        {
+          "session": 4,
+          "items": 74.8,
+          "kb": 2.24
+        },
+        {
+          "session": 5,
+          "items": 92.6,
+          "kb": 2.81
+        }
+      ]
+    },
+    {
+      "name": "flat-vector",
+      "recall_at_k": 0.6667,
+      "stale_at_k": 0.8148,
+      "recall_at_budget": 0.8111,
+      "stale_at_budget": 0.8519,
+      "recall_by_kind": {
+        "changed": 0.6667,
+        "event": 0.1,
+        "stable": 0.7736
+      },
+      "stale_at_k_by_coverage": {
+        "all_covered": 0.8421,
+        "some_uncovered": 0.75
+      },
+      "latency_ms_p50": 0.145,
+      "latency_ms_p95": 0.274,
+      "items_per_user": 92.6,
+      "kb_per_user": 141.71,
+      "growth": [
+        {
+          "session": 1,
+          "items": 22.0,
+          "kb": 33.64
+        },
+        {
+          "session": 2,
+          "items": 40.8,
+          "kb": 62.41
+        },
+        {
+          "session": 3,
+          "items": 58.4,
+          "kb": 89.34
+        },
+        {
+          "session": 4,
+          "items": 74.8,
+          "kb": 114.44
+        },
+        {
+          "session": 5,
+          "items": 92.6,
+          "kb": 141.71
+        }
+      ]
+    },
+    {
+      "name": "tiered",
+      "recall_at_k": 0.6222,
+      "stale_at_k": 0.1852,
+      "recall_at_budget": 0.8,
+      "stale_at_budget": 0.2222,
+      "recall_by_kind": {
+        "changed": 0.7037,
+        "event": 0.3,
+        "stable": 0.6415
+      },
+      "stale_at_k_by_coverage": {
+        "all_covered": 0.0,
+        "some_uncovered": 0.625
+      },
+      "latency_ms_p50": 1.165,
+      "latency_ms_p95": 2.23,
+      "items_per_user": 14.4,
+      "kb_per_user": 56.31,
+      "growth": [
+        {
+          "session": 1,
+          "items": 4.7,
+          "kb": 16.38
+        },
+        {
+          "session": 2,
+          "items": 7.9,
+          "kb": 28.24
+        },
+        {
+          "session": 3,
+          "items": 10.2,
+          "kb": 37.64
+        },
+        {
+          "session": 4,
+          "items": 12.0,
+          "kb": 46.06
+        },
+        {
+          "session": 5,
+          "items": 14.4,
+          "kb": 56.31
+        }
+      ]
+    },
+    {
+      "name": "tiered-no-supersede",
+      "recall_at_k": 0.6222,
+      "stale_at_k": 0.7407,
+      "recall_at_budget": 0.7889,
+      "stale_at_budget": 0.9259,
+      "recall_by_kind": {
+        "changed": 0.6667,
+        "event": 0.3,
+        "stable": 0.6604
+      },
+      "stale_at_k_by_coverage": {
+        "all_covered": 0.7895,
+        "some_uncovered": 0.625
+      },
+      "latency_ms_p50": 1.075,
+      "latency_ms_p95": 1.812,
+      "items_per_user": 14.4,
+      "kb_per_user": 56.31,
+      "growth": [
+        {
+          "session": 1,
+          "items": 4.7,
+          "kb": 16.38
+        },
+        {
+          "session": 2,
+          "items": 7.9,
+          "kb": 28.24
+        },
+        {
+          "session": 3,
+          "items": 10.2,
+          "kb": 37.64
+        },
+        {
+          "session": 4,
+          "items": 12.0,
+          "kb": 46.06
+        },
+        {
+          "session": 5,
+          "items": 14.4,
+          "kb": 56.31
+        }
+      ]
+    },
+    {
+      "name": "tiered-no-eviction",
+      "recall_at_k": 0.6222,
+      "stale_at_k": 0.1852,
+      "recall_at_budget": 0.8,
+      "stale_at_budget": 0.2222,
+      "recall_by_kind": {
+        "changed": 0.7037,
+        "event": 0.3,
+        "stable": 0.6415
+      },
+      "stale_at_k_by_coverage": {
+        "all_covered": 0.0,
+        "some_uncovered": 0.625
+      },
+      "latency_ms_p50": 1.073,
+      "latency_ms_p95": 2.349,
+      "items_per_user": 14.4,
+      "kb_per_user": 56.31,
+      "growth": [
+        {
+          "session": 1,
+          "items": 4.7,
+          "kb": 16.38
+        },
+        {
+          "session": 2,
+          "items": 7.9,
+          "kb": 28.24
+        },
+        {
+          "session": 3,
+          "items": 10.2,
+          "kb": 37.64
+        },
+        {
+          "session": 4,
+          "items": 12.0,
+          "kb": 46.06
+        },
+        {
+          "session": 5,
+          "items": 14.4,
+          "kb": 56.31
+        }
+      ]
+    }
+  ],
+  "extraction": {
+    "mentions": 117,
+    "recall": 0.8034188034188035,
+    "recall_covered": 1.0,
+    "recall_uncovered": 0.0,
+    "precision": 1.0,
+    "predicted": 94
+  },
+  "consolidation": {
+    "episodes": 50,
+    "raw_tokens": 7155,
+    "kept_tokens": 2344,
+    "kept_share": 0.3276,
+    "facts_added": 65,
+    "facts_superseded": 29,
+    "facts_reinforced": 0
+  },
+  "long_growth": {
+    "flat-vector": [
+      {
+        "session": 1,
+        "items": 22.0,
+        "kb": 33.64
+      },
+      {
+        "session": 2,
+        "items": 41.0,
+        "kb": 62.74
+      },
+      {
+        "session": 3,
+        "items": 59.0,
+        "kb": 90.26
+      },
+      {
+        "session": 4,
+        "items": 72.0,
+        "kb": 110.12
+      },
+      {
+        "session": 5,
+        "items": 86.0,
+        "kb": 131.5
+      },
+      {
+        "session": 6,
+        "items": 103.0,
+        "kb": 157.52
+      },
+      {
+        "session": 7,
+        "items": 117.0,
+        "kb": 178.86
+      },
+      {
+        "session": 8,
+        "items": 129.0,
+        "kb": 197.24
+      },
+      {
+        "session": 9,
+        "items": 144.0,
+        "kb": 220.19
+      },
+      {
+        "session": 10,
+        "items": 157.0,
+        "kb": 240.1
+      }
+    ],
+    "tiered-no-eviction": [
+      {
+        "session": 1,
+        "items": 3.0,
+        "kb": 12.32
+      },
+      {
+        "session": 2,
+        "items": 8.0,
+        "kb": 27.08
+      },
+      {
+        "session": 3,
+        "items": 10.5,
+        "kb": 36.95
+      },
+      {
+        "session": 4,
+        "items": 11.5,
+        "kb": 41.92
+      },
+      {
+        "session": 5,
+        "items": 12.5,
+        "kb": 48.52
+      },
+      {
+        "session": 6,
+        "items": 14.0,
+        "kb": 57.58
+      },
+      {
+        "session": 7,
+        "items": 15.5,
+        "kb": 64.19
+      },
+      {
+        "session": 8,
+        "items": 17.0,
+        "kb": 69.98
+      },
+      {
+        "session": 9,
+        "items": 19.0,
+        "kb": 77.45
+      },
+      {
+        "session": 10,
+        "items": 20.0,
+        "kb": 83.24
+      }
+    ],
+    "tiered": [
+      {
+        "session": 1,
+        "items": 3.0,
+        "kb": 12.32
+      },
+      {
+        "session": 2,
+        "items": 8.0,
+        "kb": 27.08
+      },
+      {
+        "session": 3,
+        "items": 10.5,
+        "kb": 36.95
+      },
+      {
+        "session": 4,
+        "items": 11.5,
+        "kb": 41.92
+      },
+      {
+        "session": 5,
+        "items": 12.5,
+        "kb": 48.52
+      },
+      {
+        "session": 6,
+        "items": 14.0,
+        "kb": 57.58
+      },
+      {
+        "session": 7,
+        "items": 15.5,
+        "kb": 64.19
+      },
+      {
+        "session": 8,
+        "items": 17.0,
+        "kb": 69.98
+      },
+      {
+        "session": 9,
+        "items": 19.0,
+        "kb": 77.45
+      },
+      {
+        "session": 10,
+        "items": 20.0,
+        "kb": 83.24
+      }
+    ]
+  },
+  "command": "python -m tiered_memory bench --users 10 --sessions 5 --seed 7 --embedder hashing --k 5 --budget 200 --growth-users 2 --growth-sessions 10"
+}

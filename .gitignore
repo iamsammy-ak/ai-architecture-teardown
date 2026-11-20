@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+dist/
+build/
+
+# Tool caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.hypothesis/
+
+# Secrets: never commit keys
+.env
+
+# Local caches and benchmark work directories
+.cache/
+.teardown-work/
+
+# MkDocs build output
+site/
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
