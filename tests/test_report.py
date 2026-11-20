@@ -23,10 +23,21 @@ def test_committed_tables_match_the_inputs(report: CostReport) -> None:
         assert committed == text, f"bench/results/cost/{name} is stale: run python -m teardown cost"
 
 
+def _rounded(value: object) -> object:
+    """Round floats to 9 significant digits so last-bit differences between numpy builds don't count as drift."""
+    if isinstance(value, float):
+        return float(f"{value:.9g}")
+    if isinstance(value, dict):
+        return {key: _rounded(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_rounded(item) for item in value]
+    return value
+
+
 def test_committed_json_matches_the_inputs(report: CostReport) -> None:
     committed = json.loads((RESULTS / "cost_model.json").read_text(encoding="utf-8"))
     fresh = json.loads(json.dumps(report.to_json()))
-    assert committed == fresh
+    assert _rounded(committed) == _rounded(fresh)
 
 
 def test_every_measurement_links_to_its_pinned_commit(report: CostReport, manifest) -> None:
